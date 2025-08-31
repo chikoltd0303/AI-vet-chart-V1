@@ -177,11 +177,12 @@ const AnimalDetail: React.FC<AnimalDetailProps> = ({
         ? `${editedNextVisitDate}T${editedNextVisitTime}`
         : null;
 
+    // BackendのSoapNotes(s,o,a,p)に合わせて送信
     const convertedSoap = {
-      subjective: editedSoap.s || '',
-      objective: editedSoap.o || '',
-      assessment: editedSoap.a || '',
-      plan: editedSoap.p || ''
+      s: editedSoap.s || '',
+      o: editedSoap.o || '',
+      a: editedSoap.a || '',
+      p: editedSoap.p || ''
     };
 
     const updatedRecord: any = {

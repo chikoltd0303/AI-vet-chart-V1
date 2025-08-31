@@ -177,6 +177,7 @@ export interface NewRecordFormData {
  * 新しい動物を登録するフォームのデータ。
  */
 export interface NewAnimalFormData {
+  microchip_number: string;
   name: string;
   age?: number;
   sex?: 'male' | 'female' | 'unknown';

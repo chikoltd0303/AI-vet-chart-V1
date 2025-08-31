@@ -1,15 +1,25 @@
 // lib/api.ts
-// 🔄 ここを true にすればモックAPI（開発用）、false にすれば本番API（FastAPI）を使用
-const USE_FAKE = false;
+// モックAPI使用可否は環境変数で制御
+const USE_FAKE = (process.env.NEXT_PUBLIC_USE_FAKE || "false").toLowerCase() === "true";
 
 import { fakeApi } from "@/lib/fakeApi";
-import { api as realApi } from "@/lib/realApi"; // 正しいインポート名を使用
+import { api as realApi } from "@/lib/realApi";
 
-// 両方のAPIが同じ構造を持っているので型アサーションは不要
+const baseApi = USE_FAKE ? fakeApi : realApi;
 
-export const api = USE_FAKE ? fakeApi : realApi;
+// 互換レイヤー: updateRecord の引数差異を吸収（(recordId, data) も (animalId, recordId, data) も許容）
+export const api: any = {
+  ...baseApi,
+  updateRecord: (...args: any[]) => {
+    if (args.length === 3 && typeof args[0] === 'string' && typeof args[1] === 'string') {
+      const [, recordId, data] = args;
+      return (baseApi as any).updateRecord(recordId, data);
+    }
+    return (baseApi as any).updateRecord(...args);
+  },
+};
 
-// 個別の関数エクスポート（後方互換性のため）
+// 後方互換のための関数エクスポート
 export const searchAnimals = api.searchAnimals.bind(api);
 export const fetchAnimalDetail = api.fetchAnimalDetail.bind(api);
 export const createAnimal = api.createAnimal.bind(api);
@@ -18,7 +28,7 @@ export const updateRecord = api.updateRecord.bind(api);
 export const transcribeAudio = api.transcribeAudio.bind(api);
 export const generateSoapFromText = api.generateSoapFromText.bind(api);
 
-// 追加のメソッドがある場合の安全なバインド
+// 追加メソッド（存在する場合のみ）
 export const generateSoapFromAudio = api.generateSoapFromAudio?.bind(api);
 export const generateSoapFromInput = api.generateSoapFromInput?.bind(api);
 export const uploadImage = api.uploadImage?.bind(api);

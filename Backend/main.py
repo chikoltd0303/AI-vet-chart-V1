@@ -25,6 +25,10 @@ from ai_service import GoogleAIService
 # .envファイルをロード
 load_dotenv()
 
+# GEMINI_API_KEY のエイリアス対応（どちらの変数名でも可）
+if not os.getenv("GOOGLE_GEMINI_API_KEY") and os.getenv("GEMINI_API_KEY"):
+    os.environ["GOOGLE_GEMINI_API_KEY"] = os.getenv("GEMINI_API_KEY")
+
 def write_service_account_file():
     """
     If GOOGLE_SERVICE_ACCOUNT_B64 env var is set, decode and write to service_account.json.
@@ -73,6 +77,15 @@ print(f"SPREADSHEET_ID is set: {bool(os.getenv('SPREADSHEET_ID'))}")
 # --- FastAPI アプリケーションとエンドポイント ---
 
 app = FastAPI(title="AI Vet Chart Backend (Google Cloud APIs)")
+
+# 簡易ヘルスチェック
+@app.get("/health")
+async def health():
+    return {
+        "status": "ok",
+        "apis": "google_cloud",
+        "gemini_key": bool(os.getenv("GOOGLE_GEMINI_API_KEY")),
+    }
 
 # アプリケーション起動時にサービスを初期化
 @app.on_event("startup")

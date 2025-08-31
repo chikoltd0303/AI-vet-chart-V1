@@ -8,11 +8,11 @@ import {
   Loader2,
   Save,
 } from "lucide-react";
-import type { Animal } from "@/types";
+import type { NewAnimalFormData } from "@/types";
 
 interface NewAnimalFormProps {
   onBack: () => void;
-  onSave: (animal: Animal) => Promise<void>;
+  onSave: (animal: NewAnimalFormData) => Promise<void>;
   searchTerm: string;
   isLoading: boolean;
   error: string;
@@ -27,7 +27,7 @@ const NewAnimalForm: React.FC<NewAnimalFormProps> = ({
   error,
   setError,
 }) => {
-  const [animal, setAnimal] = useState<Animal>({
+  const [animal, setAnimal] = useState<NewAnimalFormData>({
     microchip_number: "",
     farm_id: "",
     name: "",
