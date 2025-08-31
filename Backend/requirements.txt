@@ -1,0 +1,36 @@
+# Core FastAPI
+fastapi>=0.104.1,<0.110.0
+uvicorn[standard]>=0.24.0,<0.26.0
+python-dotenv>=1.0.0,<2.0.0
+python-multipart>=0.0.6,<1.0.0
+aiofiles>=23.0.0,<24.0.0
+
+# Data validation
+pydantic>=2.5.0,<3.0.0
+typing-extensions>=4.8.0,<5.0.0
+
+# HTTP requests
+requests>=2.31.0,<3.0.0
+
+# Google Cloud APIs - 認証系
+google-auth>=2.23.0,<3.0.0
+google-auth-oauthlib>=1.1.0,<2.0.0
+google-auth-httplib2>=0.1.1,<1.0.0
+
+# Google Cloud APIs - サービス系
+google-api-python-client>=2.110.0,<3.0.0
+google-cloud-speech>=2.22.0,<3.0.0
+google-generativeai>=0.3.2,<1.0.0
+
+# Google Sheets integration
+gspread>=5.0.0,<6.0.0
+
+# Image processing
+Pillow>=10.1.0,<11.0.0
+
+# Audio processing
+pydub>=0.25.0,<1.0.0
+pytz>=2023.3,<2024.0  # タイムゾーン処理用（カレンダー機能で必要）
+
+# Backward compatibility
+pathlib2>=2.3.7,<3.0.0; python_version < "3.4"
