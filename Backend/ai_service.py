@@ -4,11 +4,17 @@ from schemas import SoapNotes
 import json
 import re
 
-# 環境変数からAPIキーを設定
-GOOGLE_API_KEY = os.getenv("GOOGLE_GEMINI_API_KEY")
-if not GOOGLE_API_KEY:
-    raise ValueError("GOOGLE_GEMINI_API_KEY environment variable not set.")
-genai.configure(api_key=GOOGLE_API_KEY)
+# 環境変数からAPIキーを設定（GEMINI_API_KEY もフォールバック）
+GOOGLE_API_KEY = (
+    os.getenv("GOOGLE_GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY")
+)
+
+# モジュール読み込み時点では例外を投げず、初期化時に厳格チェック
+if GOOGLE_API_KEY:
+    try:
+        genai.configure(api_key=GOOGLE_API_KEY)
+    except Exception:
+        pass
 
 class GoogleAIService:
     """
@@ -18,6 +24,13 @@ class GoogleAIService:
         """
         AIサービスを初期化し、Geminiモデルと生成設定を構成します。
         """
+        # キーの存在を厳格チェック（GOOGLE_GEMINI_API_KEY / GEMINI_API_KEY）
+        api_key = os.getenv("GOOGLE_GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            raise ValueError(
+                "Gemini API key not set. Please set GOOGLE_GEMINI_API_KEY or GEMINI_API_KEY."
+            )
+        genai.configure(api_key=api_key)
         # JSONモードを有効にするための設定
         self.generation_config = {
             "response_mime_type": "application/json",

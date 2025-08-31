@@ -118,7 +118,8 @@ export const useAudioRecording = (
     try {
       const apiUrl = getApiUrl();
       const formData = new FormData();
-      formData.append('audio_file', file);
+      // Backend は 'audio' フィールドを受け付ける
+      formData.append('audio', file);
 
       const response = await fetch(`${apiUrl}/api/transcribe`, {
         method: 'POST',

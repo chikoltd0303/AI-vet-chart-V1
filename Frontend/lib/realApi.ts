@@ -16,7 +16,8 @@ import type {
   AppointmentFormData
 } from "@/types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+// APIベースURL（未設定時はローカル想定）
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 // カスタムエラークラス
 export class ApiClientError extends Error {
@@ -106,8 +107,10 @@ class ApiClient {
   async createAnimal(animalData: NewAnimalFormData): Promise<Animal> {
     const formData = new FormData();
 
+    // Backend 要件に合わせたフィールド
+    formData.append("microchip_number", animalData.microchip_number);
     formData.append("name", animalData.name);
-    
+
     if (animalData.age !== undefined) {
       formData.append("age", animalData.age.toString());
     }
@@ -115,10 +118,10 @@ class ApiClient {
     if (animalData.breed) formData.append("breed", animalData.breed);
     if (animalData.farm_id) formData.append("farm_id", animalData.farm_id);
     if (animalData.owner) formData.append("owner", animalData.owner);
-    
-    // サムネイル画像があれば追加
+
+    // サムネイル画像は backend 側の file フィールドへ
     if (animalData.thumbnail) {
-      formData.append("thumbnail", animalData.thumbnail);
+      formData.append("file", animalData.thumbnail);
     }
 
     return this.request<Animal>("/api/animals", {
