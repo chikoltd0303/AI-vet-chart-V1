@@ -1,0 +1,21 @@
+{
+  "name": "AI Vet Chart",
+  "portsAttributes": {
+    "8000": {
+      "label": "Backend",
+      "onAutoForward": "openPreview",
+      "visibility": "public"
+    },
+    "3000": {
+      "label": "Frontend",
+      "onAutoForward": "openPreview",
+      "visibility": "public"
+    }
+  },
+  "forwardPorts": [8000, 3000],
+  "customizations": {
+    "vscode": {
+      "extensions": []
+    }
+  }
+}
