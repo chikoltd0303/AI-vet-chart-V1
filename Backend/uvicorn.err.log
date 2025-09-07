@@ -1,0 +1,19 @@
+C:\Users\jkhor\Desktop\アプリ開発\AI-vet-chart-V1\Backend\.venv\Lib\site-packages\pydantic\_internal\_config.py:373: UserWarning: Valid config keys have changed in V2:
+* 'allow_population_by_field_name' has been renamed to 'validate_by_name'
+  warnings.warn(message, UserWarning)
+Traceback (most recent call last):
+  File "C:\Users\jkhor\Desktop\アプリ開発\AI-vet-chart-V1\Backend\main.py", line 63, in <module>
+    DB.load_from_sheets()
+  File "C:\Users\jkhor\Desktop\アプリ開発\AI-vet-chart-V1\Backend\database.py", line 209, in load_from_sheets
+    ).execute().get("values", [])
+      ^^^^^^^^^
+  File "C:\Users\jkhor\Desktop\アプリ開発\AI-vet-chart-V1\Backend\.venv\Lib\site-packages\googleapiclient\_helpers.py", line 130, in positional_wrapper
+    return wrapped(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jkhor\Desktop\アプリ開発\AI-vet-chart-V1\Backend\.venv\Lib\site-packages\googleapiclient\http.py", line 938, in execute
+    raise HttpError(resp, content, uri=self.uri)
+googleapiclient.errors.HttpError: <HttpError 404 when requesting https://sheets.googleapis.com/v4/spreadsheets/AIzaSyDk8DFPkK_4TQezqS3ARK1jAmduM_ewtKc/values/animals%21A2%3AG?alt=json returned "Requested entity was not found.". Details: "Requested entity was not found.">
+INFO:     Started server process [30560]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)

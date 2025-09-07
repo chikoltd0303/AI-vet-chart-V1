@@ -70,6 +70,7 @@ export interface Appointment {
   time: string;
   description?: string;
   status?: 'scheduled' | 'completed' | 'cancelled' | 'no-show';
+  doctor?: string; // 担当獣医（任意）
 }
 
 /**
@@ -170,6 +171,7 @@ export interface NewRecordFormData {
   autoTranscribe?: boolean;
   next_visit_date?: string;
   next_visit_time?: string;
+  doctor?: string;
 }
 
 

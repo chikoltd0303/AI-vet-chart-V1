@@ -5,30 +5,15 @@ from typing import Optional
 from pathlib import Path
 from google.cloud import speech
 import json
+from config import ensure_gcp_credentials
 
 class GoogleAudioService:
     """Google Cloud Speech-to-Text APIを使用した音声処理サービス"""
     
     def __init__(self):
-        # サービスアカウントキーファイルを環境変数から作成
-        self._setup_google_credentials()
+        # サービスアカウント資格情報の確保（共通ロジックに委譲）
+        ensure_gcp_credentials()
         self.client = speech.SpeechClient()
-    
-    def _setup_google_credentials(self):
-        """環境変数からGoogle認証情報を設定"""
-        # 既存のservice_account.json作成ロジックを流用
-        b64_str = os.getenv("GOOGLE_SERVICE_ACCOUNT_B64")
-        if b64_str and not os.path.exists("service_account.json"):
-            try:
-                data = base64.b64decode(b64_str)
-                with open("service_account.json", "wb") as fh:
-                    fh.write(data)
-                print("Google認証情報を設定しました")
-                
-                # 環境変数も設定
-                os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "service_account.json"
-            except Exception as e:
-                print(f"Google認証情報設定エラー: {e}")
     
     def transcribe_audio(self, audio_file_path: str) -> Optional[str]:
         """

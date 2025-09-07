@@ -1,0 +1,10 @@
+GOOGLE_APPLICATION_CREDENTIALS environment variable is set.
+Loading data from Google Sheets...
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+FATAL ERROR: Failed to load data from sheets.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+GOOGLE_SERVICE_ACCOUNT_B64 is set: True
+GOOGLE_GEMINI_API_KEY is set: True
+SPREADSHEET_ID is set: True
+Google Audio and AI services initialized on startup.
+INFO:     127.0.0.1:55937 - "GET /health HTTP/1.1" 200 OK

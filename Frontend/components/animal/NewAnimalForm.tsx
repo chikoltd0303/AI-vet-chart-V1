@@ -101,6 +101,7 @@ const NewAnimalForm: React.FC<NewAnimalFormProps> = ({
               placeholder="10桁以上の半角数字"
               className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
               required
+              data-testid="input-microchip"
             />
           </div>
           <div>
@@ -119,6 +120,7 @@ const NewAnimalForm: React.FC<NewAnimalFormProps> = ({
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
               required
+              data-testid="input-farm"
             />
           </div>
           <div>
@@ -137,6 +139,7 @@ const NewAnimalForm: React.FC<NewAnimalFormProps> = ({
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
               required
+              data-testid="input-name"
             />
           </div>
           <div className="text-center pt-4">
@@ -144,6 +147,7 @@ const NewAnimalForm: React.FC<NewAnimalFormProps> = ({
               type="submit"
               disabled={isLoading}
               className="bg-green-600 text-white px-8 py-3 rounded-full font-bold text-lg shadow-lg hover:bg-green-700 transition disabled:bg-green-300 flex items-center justify-center w-full mx-auto"
+              data-testid="btn-save-animal"
             >
               {isLoading ? (
                 <>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -14,7 +14,7 @@ export default function AnimalDetailPage() {
   const animalId = decodeURIComponent(params?.id || "");
 
   const [data, setData] = useState<AnimalDetailData | null>(null);
-  const [appointments, setAppointments] = useState<Record<string, Appointment[]>>({});
+  const [appointments, setAppointments] = useState<{ [key: string]: Appointment[] }>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
 

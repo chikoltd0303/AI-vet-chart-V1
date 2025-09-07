@@ -24,7 +24,7 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
   onAddNew,
   searchTerm,
 }) => (
-  <div className="w-full max-w-2xl mx-auto animate-fade-in">
+  <div className="w-full max-w-2xl mx-auto animate-fade-in" data-testid="results-view">
     <button
       onClick={onBack}
       className="flex items-center text-blue-600 hover:underline mb-4"
@@ -33,7 +33,7 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
     </button>
     <div className="bg-white rounded-lg shadow-md">
       <div className="p-4 border-b border-gray-200">
-        <h2 className="text-xl font-bold text-gray-800 flex items-center">
+        <h2 className="text-xl font-bold text-gray-800 flex items-center" data-testid="results-count">
           <List className="mr-2" /> 検索結果: {results.length} 件
         </h2>
       </div>
@@ -48,6 +48,8 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
               key={animal.microchip_number}
               onClick={() => onSelect(animal.microchip_number)}
               className="p-4 hover:bg-gray-50 cursor-pointer transition-colors flex justify-between items-center"
+              data-testid="result-item"
+              data-id={animal.microchip_number}
             >
               <div>
                 <p className="font-bold text-lg text-blue-700">{animal.name}</p>

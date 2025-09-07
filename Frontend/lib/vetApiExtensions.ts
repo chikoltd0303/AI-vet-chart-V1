@@ -26,8 +26,8 @@ class VetApiExtensions {
       if (result && typeof result === 'object') {
         // 様々なプロパティ名に対応
         transcriptionText = (result as any).transcription || 
-                           (result as any).transcribed_text || 
-                           (result as any).text || '';
+                          (result as any).transcribed_text || 
+                          (result as any).text || '';
       }
       
       // メインのTranscribeResponse型に合わせる

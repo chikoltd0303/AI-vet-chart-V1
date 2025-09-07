@@ -1,0 +1,7 @@
+# Playwright Summary
+
+- Total: 0
+- Passed: 0
+- Failed: 0
+- Skipped: 0
+- Duration: 0.0s
