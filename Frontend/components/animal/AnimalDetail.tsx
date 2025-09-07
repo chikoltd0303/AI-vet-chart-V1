@@ -34,6 +34,7 @@ interface AnimalDetailProps {
   ) => Promise<void>;
   appointments: { [key: string]: Appointment[] };
   onSelectAnimal: (microchipNumber: string) => void;
+  onAppointmentsUpdate?: () => void;
 }
 
 const AnimalDetail: React.FC<AnimalDetailProps> = ({
@@ -44,6 +45,7 @@ const AnimalDetail: React.FC<AnimalDetailProps> = ({
   onUpdateRecord,
   appointments,
   onSelectAnimal,
+  onAppointmentsUpdate,
 }) => {
   // デバッグ用 - レンダリング時刻を表示
   const [renderTime] = useState(new Date().toLocaleTimeString());
@@ -287,10 +289,54 @@ const AnimalDetail: React.FC<AnimalDetailProps> = ({
     );
   };
 
+  // 画像を安定して抽出・表示する新関数（string/obj.url/Base64を許容・重複除外）
+  const renderImagesV2 = (rec: any) => {
+    const fields = ['images', 'image', 'photo', 'photos', 'attachments'];
+    const urls: string[] = [];
+    for (const f of fields) {
+      const v = rec?.[f];
+      if (!v) continue;
+      const pushUrl = (u: any) => {
+        const s = typeof u === 'string' ? u : (u && typeof u.url === 'string' ? u.url : null);
+        if (s && s.trim() && !urls.includes(s)) urls.push(s);
+      };
+      if (Array.isArray(v)) {
+        v.forEach(pushUrl);
+      } else {
+        pushUrl(v);
+      }
+    }
+    if (urls.length === 0) return null;
+    return (
+      <div className="mt-4 bg-gray-50 p-4 rounded-lg">
+        <div className="flex items-center mb-3">
+          <ImageIcon className="h-5 w-5 text-blue-600 mr-2" />
+          <p className="font-semibold text-gray-800">診療画像 ({urls.length}枚)</p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {urls.map((u, i) => (
+            <div key={i} className="relative group">
+              <img
+                src={u}
+                alt={`診療画像 ${i + 1}`}
+                className="w-full h-24 object-cover rounded-md border-2 border-gray-200 hover:border-blue-400 transition-colors cursor-pointer"
+                onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0.3'; }}
+                onClick={() => window.open(u, '_blank')}
+              />
+              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded-md flex items-center justify-center">
+                <span className="text-white opacity-0 group-hover:opacity-100 text-sm font-medium">拡大表示</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto p-4 md:p-6 animate-fade-in">
       {/* デバッグ情報 - 開発時のみ表示 */}
-      {process.env.NODE_ENV === 'development' && (
+      {process.env.NEXT_PUBLIC_SHOW_DEBUG === '1' && (
         <div className="mb-4 p-4 bg-yellow-100 border border-yellow-400 rounded-lg">
           <h4 className="font-bold text-yellow-800 mb-2">🔧 デバッグ情報 (最終更新: {renderTime})</h4>
           <details className="text-sm">
@@ -321,7 +367,7 @@ const AnimalDetail: React.FC<AnimalDetailProps> = ({
       </div>
 
       {/* 動物詳細 */}
-      <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+      <div className="bg-white p-6 rounded-lg shadow-md mb-6" data-testid="detail-view">
         <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
           <div className="flex-1">
             <h2 className="text-3xl font-bold text-gray-800 mb-2">{animal?.name || 'データなし'}</h2>
@@ -333,7 +379,7 @@ const AnimalDetail: React.FC<AnimalDetailProps> = ({
 
           {/* 病歴概要 */}
           <div className="lg:w-1/2">
-            {medicalSummary && (
+            {process.env.NEXT_PUBLIC_E2E !== '1' && medicalSummary && (
               <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
                 <h4 className="font-bold flex items-center mb-3 text-blue-800">
                   <Activity className="mr-2 h-4 w-4" /> 病歴概要
@@ -394,6 +440,7 @@ const AnimalDetail: React.FC<AnimalDetailProps> = ({
         setIsProcessing={setIsProcessing}
         appointments={appointments}
         onSelectAnimal={onSelectAnimal}
+        onAppointmentsUpdate={onAppointmentsUpdate}
       />
 
       {/* 記録一覧 */}
@@ -428,6 +475,7 @@ const AnimalDetail: React.FC<AnimalDetailProps> = ({
                           onClick={() => handleUpdateSave(rec.id, rec)}
                           disabled={isUpdating}
                           className="bg-green-600 text-white p-2 rounded-full shadow hover:bg-green-700 transition disabled:bg-green-300 flex items-center justify-center w-10 h-10"
+                          data-testid="btn-save-record"
                         >
                           {isUpdating ? (
                             <Loader2 className="h-5 w-5 animate-spin" />
@@ -439,6 +487,7 @@ const AnimalDetail: React.FC<AnimalDetailProps> = ({
                           onClick={handleCancelEdit}
                           disabled={isUpdating}
                           className="bg-red-500 text-white p-2 rounded-full shadow hover:bg-red-600 transition disabled:bg-red-300"
+                          data-testid="btn-cancel-edit"
                         >
                           <X className="h-5 w-5" />
                         </button>
@@ -447,6 +496,7 @@ const AnimalDetail: React.FC<AnimalDetailProps> = ({
                       <button
                         onClick={() => handleStartEdit(rec)}
                         className="bg-gray-200 text-gray-700 p-2 rounded-full shadow-sm hover:bg-gray-300 transition"
+                        data-testid="btn-edit-record"
                       >
                         <Edit2 className="h-5 w-5" />
                       </button>
@@ -471,6 +521,7 @@ const AnimalDetail: React.FC<AnimalDetailProps> = ({
                                 )
                               }
                               className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-gray-800"
+                              data-testid={`edit-soap-${String(key)}`}
                               rows={key === "s" || key === "o" ? 3 : 2}
                             />
                           </div>
@@ -542,7 +593,7 @@ const AnimalDetail: React.FC<AnimalDetailProps> = ({
                       </div>
                       
                       {/* 画像表示 - 新しい関数を使用 */}
-                      {renderImages(rec)}
+                      {renderImagesV2(rec)}
                       
                       {rec.next_visit_date && (
                         <div className="mt-4 p-3 bg-purple-100 border-l-4 border-purple-500 rounded-r-lg">

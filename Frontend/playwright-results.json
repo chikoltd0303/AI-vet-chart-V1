@@ -1,0 +1,508 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\playwright.config.ts",
+    "rootDir": "C:/Users/jkhor/Desktop/アプリ開発/AI-vet-chart-V1/Frontend/tests/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 6
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "html",
+        {
+          "outputFolder": "playwright-report",
+          "open": "never"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "playwright-results.json"
+        }
+      ],
+      [
+        "junit",
+        {
+          "outputFile": "playwright-junit.xml"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "C:/Users/jkhor/Desktop/アプリ開発/AI-vet-chart-V1/Frontend/playwright-artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 6
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/jkhor/Desktop/アプリ開発/AI-vet-chart-V1/Frontend/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.55.0",
+    "workers": 10,
+    "webServer": {
+      "command": "npm run dev",
+      "port": 3000,
+      "timeout": 120000,
+      "reuseExistingServer": true
+    }
+  },
+  "suites": [
+    {
+      "title": "form.spec.ts",
+      "file": "form.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "検索フォームから結果一覧が表示される（APIモック）",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 18,
+                  "parallelIndex": 0,
+                  "status": "timedOut",
+                  "duration": 32833,
+                  "error": {
+                    "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                    "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                    },
+                    {
+                      "location": {
+                        "file": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\tests\\e2e\\form.spec.ts",
+                        "column": 14,
+                        "line": 36
+                      },
+                      "message": "Error: page.waitForResponse: Test timeout of 30000ms exceeded.\n\n\u001b[0m \u001b[90m 34 |\u001b[39m\n \u001b[90m 35 |\u001b[39m   \u001b[90m// API リクエスト完了を待機\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 36 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForResponse((resp) \u001b[33m=>\u001b[39m resp\u001b[33m.\u001b[39murl()\u001b[33m.\u001b[39mincludes(\u001b[32m'/api/animals'\u001b[39m) \u001b[33m&&\u001b[39m resp\u001b[33m.\u001b[39mok())\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m              \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 37 |\u001b[39m\n \u001b[90m 38 |\u001b[39m   \u001b[90m// 検索結果表示を確認（結果ビューが表示され、アイテムが1件）\u001b[39m\n \u001b[90m 39 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'results-view'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\tests\\e2e\\form.spec.ts:36:14\u001b[22m"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2025-09-04T13:54:32.366Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\playwright-artifacts\\form-検索フォームから結果一覧が表示される（APIモック）-chromium\\test-failed-1.png"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\playwright-artifacts\\form-検索フォームから結果一覧が表示される（APIモック）-chromium\\video.webm"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\playwright-artifacts\\form-検索フォームから結果一覧が表示される（APIモック）-chromium\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\playwright-artifacts\\form-検索フォームから結果一覧が表示される（APIモック）-chromium\\trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "db4f41bf4476c0fbb431-78ca0cc5b78bd4266319",
+          "file": "form.spec.ts",
+          "line": 3,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "health.spec.ts",
+      "file": "health.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "バックエンドの/healthが応答する",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 19,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 636,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2025-09-04T13:54:32.399Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\playwright-artifacts\\health-バックエンドの-healthが応答する-chromium\\trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "760d72a3746ac5132f88-ab212f62e30e3de68bac",
+          "file": "health.spec.ts",
+          "line": 3,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "new-animal.spec.ts",
+      "file": "new-animal.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "新規登録フローで詳細画面に遷移（APIモック）",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 20,
+                  "parallelIndex": 2,
+                  "status": "failed",
+                  "duration": 12112,
+                  "error": {
+                    "message": "Error: expect.toBeVisible: Error: strict mode violation: getByText('テスト牛') resolved to 2 elements:\n    1) <pre class=\"bg-white p-2 rounded text-xs overflow-auto max-h-40\">{↵  \"animal\": {↵    \"id\": \"1234567890\",↵    \"micr…</pre> aka getByText('{ \"animal\": { \"id\": \"')\n    2) <h2 class=\"text-3xl font-bold text-gray-800 mb-2\">テスト牛</h2> aka getByRole('heading', { name: 'テスト牛' })\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText('テスト牛')\u001b[22m\n",
+                    "stack": "Error: expect.toBeVisible: Error: strict mode violation: getByText('テスト牛') resolved to 2 elements:\n    1) <pre class=\"bg-white p-2 rounded text-xs overflow-auto max-h-40\">{↵  \"animal\": {↵    \"id\": \"1234567890\",↵    \"micr…</pre> aka getByText('{ \"animal\": { \"id\": \"')\n    2) <h2 class=\"text-3xl font-bold text-gray-800 mb-2\">テスト牛</h2> aka getByRole('heading', { name: 'テスト牛' })\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText('テスト牛')\u001b[22m\n\n    at C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\tests\\e2e\\new-animal.spec.ts:47:40",
+                    "location": {
+                      "file": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\tests\\e2e\\new-animal.spec.ts",
+                      "column": 40,
+                      "line": 47
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 45 |\u001b[39m\n \u001b[90m 46 |\u001b[39m   \u001b[90m// 詳細表示の一部が見える\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 47 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(\u001b[32m'テスト牛'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 48 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(id))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m 49 |\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 50 |\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\tests\\e2e\\new-animal.spec.ts",
+                        "column": 40,
+                        "line": 47
+                      },
+                      "message": "Error: expect.toBeVisible: Error: strict mode violation: getByText('テスト牛') resolved to 2 elements:\n    1) <pre class=\"bg-white p-2 rounded text-xs overflow-auto max-h-40\">{↵  \"animal\": {↵    \"id\": \"1234567890\",↵    \"micr…</pre> aka getByText('{ \"animal\": { \"id\": \"')\n    2) <h2 class=\"text-3xl font-bold text-gray-800 mb-2\">テスト牛</h2> aka getByRole('heading', { name: 'テスト牛' })\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText('テスト牛')\u001b[22m\n\n\n\u001b[0m \u001b[90m 45 |\u001b[39m\n \u001b[90m 46 |\u001b[39m   \u001b[90m// 詳細表示の一部が見える\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 47 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(\u001b[32m'テスト牛'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 48 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(id))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m 49 |\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 50 |\u001b[39m\u001b[0m\n\u001b[2m    at C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\tests\\e2e\\new-animal.spec.ts:47:40\u001b[22m"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2025-09-04T13:54:32.375Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\playwright-artifacts\\new-animal-新規登録フローで詳細画面に遷移（APIモック）-chromium\\test-failed-1.png"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\playwright-artifacts\\new-animal-新規登録フローで詳細画面に遷移（APIモック）-chromium\\video.webm"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\playwright-artifacts\\new-animal-新規登録フローで詳細画面に遷移（APIモック）-chromium\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\playwright-artifacts\\new-animal-新規登録フローで詳細画面に遷移（APIモック）-chromium\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\tests\\e2e\\new-animal.spec.ts",
+                    "column": 40,
+                    "line": 47
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "72b0b590eb12c8fd5ba6-d0dbd40887da9ab85cdb",
+          "file": "new-animal.spec.ts",
+          "line": 3,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "record-edit.spec.ts",
+      "file": "record-edit.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "詳細画面で記録を編集して保存（APIモック）",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 21,
+                  "parallelIndex": 3,
+                  "status": "timedOut",
+                  "duration": 32776,
+                  "error": {
+                    "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                    "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                    },
+                    {
+                      "location": {
+                        "file": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\tests\\e2e\\record-edit.spec.ts",
+                        "column": 14,
+                        "line": 57
+                      },
+                      "message": "Error: page.waitForResponse: Test timeout of 30000ms exceeded.\n\n\u001b[0m \u001b[90m 55 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'search-input'\u001b[39m)\u001b[33m.\u001b[39mfill(\u001b[32m'編集'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 56 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'btn-search'\u001b[39m)\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 57 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForResponse((resp) \u001b[33m=>\u001b[39m resp\u001b[33m.\u001b[39murl()\u001b[33m.\u001b[39mincludes(\u001b[32m'/api/animals'\u001b[39m) \u001b[33m&&\u001b[39m resp\u001b[33m.\u001b[39mok())\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m              \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 58 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'result-item'\u001b[39m)\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m 59 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'detail-view'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m 60 |\u001b[39m\u001b[0m\n\u001b[2m    at C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\tests\\e2e\\record-edit.spec.ts:57:14\u001b[22m"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2025-09-04T13:54:32.428Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\playwright-artifacts\\record-edit-詳細画面で記録を編集して保存（APIモック）-chromium\\test-failed-1.png"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\playwright-artifacts\\record-edit-詳細画面で記録を編集して保存（APIモック）-chromium\\video.webm"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\playwright-artifacts\\record-edit-詳細画面で記録を編集して保存（APIモック）-chromium\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\playwright-artifacts\\record-edit-詳細画面で記録を編集して保存（APIモック）-chromium\\trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3a0574c6f27d6fab63f0-3c0604cb09e36643a8e8",
+          "file": "record-edit.spec.ts",
+          "line": 3,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "search-to-detail.spec.ts",
+      "file": "search-to-detail.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "検索→結果→詳細への遷移（APIモック）",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 22,
+                  "parallelIndex": 4,
+                  "status": "timedOut",
+                  "duration": 32738,
+                  "error": {
+                    "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                    "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                    },
+                    {
+                      "location": {
+                        "file": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\tests\\e2e\\search-to-detail.spec.ts",
+                        "column": 14,
+                        "line": 29
+                      },
+                      "message": "Error: page.waitForResponse: Test timeout of 30000ms exceeded.\n\n\u001b[0m \u001b[90m 27 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'search-input'\u001b[39m)\u001b[33m.\u001b[39mfill(\u001b[32m'モック'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 28 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'btn-search'\u001b[39m)\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 29 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForResponse((resp) \u001b[33m=>\u001b[39m resp\u001b[33m.\u001b[39murl()\u001b[33m.\u001b[39mincludes(\u001b[32m'/api/animals'\u001b[39m) \u001b[33m&&\u001b[39m resp\u001b[33m.\u001b[39mok())\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m              \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 30 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'results-view'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m 31 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'result-item'\u001b[39m))\u001b[33m.\u001b[39mtoHaveCount(\u001b[35m1\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 32 |\u001b[39m\u001b[0m\n\u001b[2m    at C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\tests\\e2e\\search-to-detail.spec.ts:29:14\u001b[22m"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2025-09-04T13:54:32.477Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\playwright-artifacts\\search-to-detail-検索→結果→詳細への遷移（APIモック）-chromium\\test-failed-1.png"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\playwright-artifacts\\search-to-detail-検索→結果→詳細への遷移（APIモック）-chromium\\video.webm"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\playwright-artifacts\\search-to-detail-検索→結果→詳細への遷移（APIモック）-chromium\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\playwright-artifacts\\search-to-detail-検索→結果→詳細への遷移（APIモック）-chromium\\trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "f4c59c89360514fe2532-4941fb80881d49f824b9",
+          "file": "search-to-detail.spec.ts",
+          "line": 3,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "smoke.spec.ts",
+      "file": "smoke.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "トップページが表示される",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 23,
+                  "parallelIndex": 5,
+                  "status": "passed",
+                  "duration": 11287,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2025-09-04T13:54:32.500Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\jkhor\\Desktop\\アプリ開発\\AI-vet-chart-V1\\Frontend\\playwright-artifacts\\smoke-トップページが表示される-chromium\\trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "4219922fea2e2bd3c691-2f1250b94a9c385849cc",
+          "file": "smoke.spec.ts",
+          "line": 3,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-09-04T13:54:28.292Z",
+    "duration": 38230.33700000006,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 4,
+    "flaky": 0
+  }
+}

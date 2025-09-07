@@ -7,9 +7,11 @@ import type {
   Appointment,
   ViewState,
   Record,
+  NewAnimalFormData,
 } from "@/types";
 import { api } from "@/lib/api";
 import { updateAppointments, generateFarmList } from "@/lib/dataService";
+import { MOCK_DB } from "@/data/mockDB";
 
 import AnimalSearch from "@/components/search/AnimalSearch";
 import SearchResultsList from "@/components/search/SearchResultsList";
@@ -19,6 +21,9 @@ import VetCalendar from "@/components/calendar/VetCalendar";
 import DailyAppointments from "@/components/calendar/DailyAppointments";
 //import { AudioRecordingTest } from '@/components/shared/AudioRecordingTest'; // 追加
 import { Loader2 } from "lucide-react";
+import DoctorSelector from "@/components/shared/DoctorSelector";
+import LanguageSelector from "@/components/shared/LanguageSelector";
+import { useDoctor } from "@/hooks/useDoctor";
 
 export default function Page() {
   const [view, setView] = useState<ViewState>("search");
@@ -34,6 +39,7 @@ export default function Page() {
   }>({});
   const [farmList, setFarmList] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const { doctor, setDoctor } = useDoctor();
 
   // SSR時は null にしてCSR後に設定
   const [calendarDate, setCalendarDate] = useState<Date | null>(null);
@@ -104,15 +110,39 @@ export default function Page() {
 
   const handleSaveRecord = async (
     microchip_number: string,
-    recordData: Omit<Record, "id" | "visit_date">
+    recordData: any
   ) => {
     setIsLoading(true);
     setError("");
     try {
+      // 次回予約の結合（YYYY-MM-DDTHH:MM）
+      const fullNextVisit = recordData.nextVisitDate && recordData.nextVisitTime
+        ? `${recordData.nextVisitDate}T${recordData.nextVisitTime}`
+        : undefined;
+
       await api.createRecord({
         animalId: microchip_number,
         soap: recordData.soap,
+        images: recordData.images,
+        next_visit_date: fullNextVisit,
+        next_visit_time: recordData.nextVisitTime,
+        doctor: doctor || undefined,
       });
+
+      // 月一覧への即時反映用にMOCK_DBへも追記（疑似的に予定を追加）
+      try {
+        const key = microchip_number;
+        if (!MOCK_DB.records[key]) MOCK_DB.records[key] = [] as any;
+        MOCK_DB.records[key].push({
+          id: `rec_${Date.now()}`,
+          visit_date: new Date().toISOString().slice(0,10),
+          soap: recordData.soap,
+          medication_history: [],
+          next_visit_date: fullNextVisit,
+          images: [],
+        } as any);
+      } catch {}
+
       const data = await api.fetchAnimalDetail(microchip_number);
       if (data) setCurrentAnimalData(data);
       await refreshAppData();
@@ -131,7 +161,7 @@ export default function Page() {
     setIsLoading(true);
     setError("");
     try {
-      await api.updateRecord(microchip_number, recordId, updatedRecordData);
+      await api.updateRecord(recordId, updatedRecordData);
       const data = await api.fetchAnimalDetail(microchip_number);
       if (data) setCurrentAnimalData(data);
       await refreshAppData();
@@ -146,7 +176,7 @@ export default function Page() {
     setView("newAnimal");
   };
 
-  const handleSaveNewAnimal = async (animalData: Animal) => {
+  const handleSaveNewAnimal = async (animalData: NewAnimalFormData) => {
     setIsLoading(true);
     setError("");
     try {
@@ -239,6 +269,7 @@ export default function Page() {
             onUpdateRecord={handleUpdateRecord}
             appointments={appointments}
             onSelectAnimal={handleSelectAnimal}
+            onAppointmentsUpdate={refreshAppData}
           />
         ) : null;
       case "calendar":
@@ -282,11 +313,17 @@ export default function Page() {
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-4">
+        <div className="mb-4 flex justify-end gap-4">
+          <LanguageSelector />
+          <DoctorSelector />
+        </div>
+        <div className="py-4">
         {error && view !== "newAnimal" && (
           <p className="text-red-500 text-center mb-4">{error}</p>
         )}
         {renderContent()}
+        </div>
       </div>
     </div>
   );

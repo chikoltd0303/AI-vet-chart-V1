@@ -1,7 +1,8 @@
+"use client";
 import React from "react";
 import { ArrowLeft, Calendar, Home } from "lucide-react";
-//import type { Appointment } from "@/types";
 import type { AppointmentWithAnimalInfo } from "@/types";
+import { useI18n } from "@/lib/i18n";
 
 interface DailyAppointmentsProps {
   onBack: () => void;
@@ -18,37 +19,33 @@ const DailyAppointments: React.FC<DailyAppointmentsProps> = ({
   selectedDate,
   onSelectAnimal,
 }) => {
+  const { lang } = useI18n();
   const sortedAppointments = [...appointments].sort((a, b) => {
-    return a.date.localeCompare(b.date);;
+    const ta = a.time || "";
+    const tb = b.time || "";
+    if (ta && tb) return ta.localeCompare(tb);
+    return a.date.localeCompare(b.date);
   });
 
   return (
     <div className="w-full max-w-4xl mx-auto p-4 md:p-6 animate-fade-in">
       <div className="flex justify-between items-center mb-4">
-        <button
-          onClick={onBack}
-          className="flex items-center text-blue-600 hover:underline"
-        >
-          <ArrowLeft className="mr-1 h-4 w-4" /> カレンダーに戻る
+        <button onClick={onBack} className="flex items-center text-blue-600 hover:underline">
+          <ArrowLeft className="mr-1 h-4 w-4" /> {lang === 'ja' ? 'カレンダーに戻る' : 'Back to Calendar'}
         </button>
-        <button
-          onClick={onHome}
-          className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
-        >
-          <Home className="mr-1 h-4 w-4" /> ホームへ
+        <button onClick={onHome} className="flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+          <Home className="mr-1 h-4 w-4" /> {lang === 'ja' ? 'ホームへ' : 'Home'}
         </button>
       </div>
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-gray-800 flex items-center mb-4">
+        <h2 className="text-2xl font-bold text-gray-900 flex items-center mb-4">
           <Calendar className="mr-2" />
-          {selectedDate} の予定
+          {selectedDate} {lang === 'ja' ? 'の予約' : 'Appointments'}
         </h2>
         {sortedAppointments.length > 0 ? (
           <ul className="divide-y divide-gray-200">
             {sortedAppointments.map((app, index) => {
-              const time =
-                app.date.split("T")[1]?.substring(0, 5) ||
-                "時間未定";
+              const time = app.time || app.date.split("T")[1]?.substring(0, 5) || '';
               return (
                 <li
                   key={index}
@@ -61,15 +58,22 @@ const DailyAppointments: React.FC<DailyAppointmentsProps> = ({
                     </span>
                     {app.animal_name}
                   </p>
-                  <p className="text-sm text-gray-800">牧場: {app.farm_id}</p>
-                  <p className="text-sm text-gray-800">所見: {app.summary}</p>
+                  {app.doctor && (
+                    <p className="text-sm text-gray-900">{lang === 'ja' ? '担当' : 'Doctor'}: <span className="font-semibold text-gray-900">{app.doctor}</span></p>
+                  )}
+                  {app.farm_id && (
+                    <p className="text-sm text-gray-900">{lang === 'ja' ? '牧場' : 'Farm'}: {app.farm_id}</p>
+                  )}
+                  {app.summary && (
+                    <p className="text-sm text-gray-900">{lang === 'ja' ? '所見' : 'Notes'}: {app.summary}</p>
+                  )}
                 </li>
               );
             })}
           </ul>
         ) : (
-          <div className="text-center py-10 text-gray-800">
-            この日には予定はありません。
+          <div className="text-center py-10 text-gray-900">
+            {lang === 'ja' ? 'この日には予定はありません' : 'No appointments on this date.'}
           </div>
         )}
       </div>

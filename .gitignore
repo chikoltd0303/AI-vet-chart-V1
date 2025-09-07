@@ -2,3 +2,13 @@ service_account.json
 node_modules/
 .env
 .venv/
+__pycache__/
+*.b64
+.env.local
+**/.env.local
+Frontend/.env.local
+
+# Next.js build output
+.next/
+# Windows reserved filename accidentally added
+CON

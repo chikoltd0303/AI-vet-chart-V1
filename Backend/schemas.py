@@ -26,6 +26,8 @@ class Record(BaseModel):
     visit_date: str = Field(default_factory=lambda: date.today().isoformat())
     medication_history: List[str] = []
     next_visit_date: Optional[str] = None
+    next_visit_time: Optional[str] = None
+    doctor: Optional[str] = None
     
     # createdAtはFastAPIから返却する際に使われる想定
     createdAt: datetime = Field(default_factory=datetime.utcnow)
@@ -56,6 +58,7 @@ class Appointment(BaseModel):
     date: str
     time: str
     description: Optional[str] = None
+    doctor: Optional[str] = None
 
 class UploadResponse(BaseModel):
     url: Optional[str] = None

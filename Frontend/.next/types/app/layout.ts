@@ -1,4 +1,4 @@
-// File: /workspaces/AI-vet-chart-V1/Frontend/app/layout.tsx
+// File: C:\Users\jkhor\Desktop\アプリ開発\AI-vet-chart-V1\Frontend\app\layout.tsx
 import * as entry from '../../../app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

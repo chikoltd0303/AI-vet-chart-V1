@@ -248,6 +248,8 @@ class ApiClient {
     audio?: File;
     autoTranscribe?: boolean;
     next_visit_date?: string;
+    next_visit_time?: string;
+    doctor?: string;
     medication_history?: string[];
   }): Promise<RecordCreationResponse> {
     const formData = new FormData();
@@ -271,6 +273,12 @@ class ApiClient {
     
     if (recordData.next_visit_date) {
       formData.append("next_visit_date", recordData.next_visit_date);
+    }
+    if (recordData.next_visit_time) {
+      formData.append("next_visit_time", recordData.next_visit_time);
+    }
+    if (recordData.doctor) {
+      formData.append("doctor", recordData.doctor);
     }
     
     if (recordData.medication_history) {

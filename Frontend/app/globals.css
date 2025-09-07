@@ -19,3 +19,19 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Improve default form control readability */
+input, select, textarea {
+  color: #111827; /* gray-900 */
+  background-color: #ffffff;
+  border-color: #6b7280; /* gray-500 */
+}
+input::placeholder, textarea::placeholder {
+  color: #6b7280; /* gray-500 */
+  opacity: 1;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59,130,246,.5); /* blue-500 */
+  border-color: #3b82f6;
+}

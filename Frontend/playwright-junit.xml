@@ -1,0 +1,225 @@
+<testsuites id="" name="" tests="6" failures="4" skipped="0" errors="0" time="38.230337000000056">
+<testsuite name="form.spec.ts" timestamp="2025-09-04T13:54:30.282Z" hostname="chromium" tests="1" failures="1" skipped="0" time="32.833" errors="0">
+<testcase name="検索フォームから結果一覧が表示される（APIモック）" classname="form.spec.ts" time="32.833">
+<failure message="form.spec.ts:3:5 検索フォームから結果一覧が表示される（APIモック）" type="FAILURE">
+<![CDATA[  [chromium] › form.spec.ts:3:5 › 検索フォームから結果一覧が表示される（APIモック） ───────────────────────────────────────
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.waitForResponse: Test timeout of 30000ms exceeded.
+
+      34 |
+      35 |   // API リクエスト完了を待機
+    > 36 |   await page.waitForResponse((resp) => resp.url().includes('/api/animals') && resp.ok());
+         |              ^
+      37 |
+      38 |   // 検索結果表示を確認（結果ビューが表示され、アイテムが1件）
+      39 |   await expect(page.getByTestId('results-view')).toBeVisible();
+        at C:\Users\jkhor\Desktop\アプリ開発\AI-vet-chart-V1\Frontend\tests\e2e\form.spec.ts:36:14
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\playwright-artifacts\form-検索フォームから結果一覧が表示される（APIモック）-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\playwright-artifacts\form-検索フォームから結果一覧が表示される（APIモック）-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\playwright-artifacts\form-検索フォームから結果一覧が表示される（APIモック）-chromium\error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\playwright-artifacts\form-検索フォームから結果一覧が表示される（APIモック）-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\playwright-artifacts\form-検索フォームから結果一覧が表示される（APIモック）-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|playwright-artifacts\form-検索フォームから結果一覧が表示される（APIモック）-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|playwright-artifacts\form-検索フォームから結果一覧が表示される（APIモック）-chromium\video.webm]]
+
+[[ATTACHMENT|playwright-artifacts\form-検索フォームから結果一覧が表示される（APIモック）-chromium\error-context.md]]
+
+[[ATTACHMENT|playwright-artifacts\form-検索フォームから結果一覧が表示される（APIモック）-chromium\trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="health.spec.ts" timestamp="2025-09-04T13:54:30.282Z" hostname="chromium" tests="1" failures="0" skipped="0" time="0.636" errors="0">
+<testcase name="バックエンドの/healthが応答する" classname="health.spec.ts" time="0.636">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|playwright-artifacts\health-バックエンドの-healthが応答する-chromium\trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="new-animal.spec.ts" timestamp="2025-09-04T13:54:30.282Z" hostname="chromium" tests="1" failures="1" skipped="0" time="12.112" errors="0">
+<testcase name="新規登録フローで詳細画面に遷移（APIモック）" classname="new-animal.spec.ts" time="12.112">
+<failure message="new-animal.spec.ts:3:5 新規登録フローで詳細画面に遷移（APIモック）" type="FAILURE">
+<![CDATA[  [chromium] › new-animal.spec.ts:3:5 › 新規登録フローで詳細画面に遷移（APIモック） ────────────────────────────────────
+
+    Error: expect.toBeVisible: Error: strict mode violation: getByText('テスト牛') resolved to 2 elements:
+        1) <pre class="bg-white p-2 rounded text-xs overflow-auto max-h-40">{↵  "animal": {↵    "id": "1234567890",↵    "micr…</pre> aka getByText('{ "animal": { "id": "')
+        2) <h2 class="text-3xl font-bold text-gray-800 mb-2">テスト牛</h2> aka getByRole('heading', { name: 'テスト牛' })
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for getByText('テスト牛')
+
+
+      45 |
+      46 |   // 詳細表示の一部が見える
+    > 47 |   await expect(page.getByText('テスト牛')).toBeVisible();
+         |                                        ^
+      48 |   await expect(page.getByText(id)).toBeVisible();
+      49 | });
+      50 |
+        at C:\Users\jkhor\Desktop\アプリ開発\AI-vet-chart-V1\Frontend\tests\e2e\new-animal.spec.ts:47:40
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\playwright-artifacts\new-animal-新規登録フローで詳細画面に遷移（APIモック）-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\playwright-artifacts\new-animal-新規登録フローで詳細画面に遷移（APIモック）-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\playwright-artifacts\new-animal-新規登録フローで詳細画面に遷移（APIモック）-chromium\error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\playwright-artifacts\new-animal-新規登録フローで詳細画面に遷移（APIモック）-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\playwright-artifacts\new-animal-新規登録フローで詳細画面に遷移（APIモック）-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|playwright-artifacts\new-animal-新規登録フローで詳細画面に遷移（APIモック）-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|playwright-artifacts\new-animal-新規登録フローで詳細画面に遷移（APIモック）-chromium\video.webm]]
+
+[[ATTACHMENT|playwright-artifacts\new-animal-新規登録フローで詳細画面に遷移（APIモック）-chromium\error-context.md]]
+
+[[ATTACHMENT|playwright-artifacts\new-animal-新規登録フローで詳細画面に遷移（APIモック）-chromium\trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="record-edit.spec.ts" timestamp="2025-09-04T13:54:30.282Z" hostname="chromium" tests="1" failures="1" skipped="0" time="32.776" errors="0">
+<testcase name="詳細画面で記録を編集して保存（APIモック）" classname="record-edit.spec.ts" time="32.776">
+<failure message="record-edit.spec.ts:3:5 詳細画面で記録を編集して保存（APIモック）" type="FAILURE">
+<![CDATA[  [chromium] › record-edit.spec.ts:3:5 › 詳細画面で記録を編集して保存（APIモック） ────────────────────────────────────
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.waitForResponse: Test timeout of 30000ms exceeded.
+
+      55 |   await page.getByTestId('search-input').fill('編集');
+      56 |   await page.getByTestId('btn-search').click();
+    > 57 |   await page.waitForResponse((resp) => resp.url().includes('/api/animals') && resp.ok());
+         |              ^
+      58 |   await page.getByTestId('result-item').click();
+      59 |   await expect(page.getByTestId('detail-view')).toBeVisible();
+      60 |
+        at C:\Users\jkhor\Desktop\アプリ開発\AI-vet-chart-V1\Frontend\tests\e2e\record-edit.spec.ts:57:14
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\playwright-artifacts\record-edit-詳細画面で記録を編集して保存（APIモック）-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\playwright-artifacts\record-edit-詳細画面で記録を編集して保存（APIモック）-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\playwright-artifacts\record-edit-詳細画面で記録を編集して保存（APIモック）-chromium\error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\playwright-artifacts\record-edit-詳細画面で記録を編集して保存（APIモック）-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\playwright-artifacts\record-edit-詳細画面で記録を編集して保存（APIモック）-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|playwright-artifacts\record-edit-詳細画面で記録を編集して保存（APIモック）-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|playwright-artifacts\record-edit-詳細画面で記録を編集して保存（APIモック）-chromium\video.webm]]
+
+[[ATTACHMENT|playwright-artifacts\record-edit-詳細画面で記録を編集して保存（APIモック）-chromium\error-context.md]]
+
+[[ATTACHMENT|playwright-artifacts\record-edit-詳細画面で記録を編集して保存（APIモック）-chromium\trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="search-to-detail.spec.ts" timestamp="2025-09-04T13:54:30.282Z" hostname="chromium" tests="1" failures="1" skipped="0" time="32.738" errors="0">
+<testcase name="検索→結果→詳細への遷移（APIモック）" classname="search-to-detail.spec.ts" time="32.738">
+<failure message="search-to-detail.spec.ts:3:5 検索→結果→詳細への遷移（APIモック）" type="FAILURE">
+<![CDATA[  [chromium] › search-to-detail.spec.ts:3:5 › 検索→結果→詳細への遷移（APIモック） ─────────────────────────────────
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.waitForResponse: Test timeout of 30000ms exceeded.
+
+      27 |   await page.getByTestId('search-input').fill('モック');
+      28 |   await page.getByTestId('btn-search').click();
+    > 29 |   await page.waitForResponse((resp) => resp.url().includes('/api/animals') && resp.ok());
+         |              ^
+      30 |   await expect(page.getByTestId('results-view')).toBeVisible();
+      31 |   await expect(page.getByTestId('result-item')).toHaveCount(1);
+      32 |
+        at C:\Users\jkhor\Desktop\アプリ開発\AI-vet-chart-V1\Frontend\tests\e2e\search-to-detail.spec.ts:29:14
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\playwright-artifacts\search-to-detail-検索→結果→詳細への遷移（APIモック）-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\playwright-artifacts\search-to-detail-検索→結果→詳細への遷移（APIモック）-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\playwright-artifacts\search-to-detail-検索→結果→詳細への遷移（APIモック）-chromium\error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\..\playwright-artifacts\search-to-detail-検索→結果→詳細への遷移（APIモック）-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\..\playwright-artifacts\search-to-detail-検索→結果→詳細への遷移（APIモック）-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|playwright-artifacts\search-to-detail-検索→結果→詳細への遷移（APIモック）-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|playwright-artifacts\search-to-detail-検索→結果→詳細への遷移（APIモック）-chromium\video.webm]]
+
+[[ATTACHMENT|playwright-artifacts\search-to-detail-検索→結果→詳細への遷移（APIモック）-chromium\error-context.md]]
+
+[[ATTACHMENT|playwright-artifacts\search-to-detail-検索→結果→詳細への遷移（APIモック）-chromium\trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="smoke.spec.ts" timestamp="2025-09-04T13:54:30.282Z" hostname="chromium" tests="1" failures="0" skipped="0" time="11.287" errors="0">
+<testcase name="トップページが表示される" classname="smoke.spec.ts" time="11.287">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|playwright-artifacts\smoke-トップページが表示される-chromium\trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+</testsuites>

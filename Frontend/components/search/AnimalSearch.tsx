@@ -38,7 +38,7 @@ const AnimalSearch: React.FC<AnimalSearchProps> = ({
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-md mx-auto" data-testid="search-view">
       <div className="text-center mb-8">
         <div className="inline-block bg-white p-4 rounded-full shadow-md">
           <Stethoscope className="h-16 w-16 text-blue-600" />
@@ -51,6 +51,7 @@ const AnimalSearch: React.FC<AnimalSearchProps> = ({
       <form
         onSubmit={handleSubmit}
         className="flex items-center bg-white p-2 rounded-full shadow-lg"
+        data-testid="search-form"
       >
         <Search className="h-6 w-6 text-gray-400 mx-3" />
         <input
@@ -59,11 +60,13 @@ const AnimalSearch: React.FC<AnimalSearchProps> = ({
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="チップナンバー、患畜名、牧場名..."
           className="w-full bg-transparent focus:outline-none text-lg text-gray-800"
+          data-testid="search-input"
         />
         <button
           type="submit"
           disabled={isLoading || !searchTerm.trim()}
           className="bg-blue-600 text-white rounded-full px-6 py-3 font-semibold hover:bg-blue-700 transition-colors disabled:bg-blue-300 flex items-center"
+          data-testid="btn-search"
         >
           {isLoading ? <Loader2 className="animate-spin h-5 w-5" /> : "検索"}
         </button>
@@ -90,6 +93,7 @@ const AnimalSearch: React.FC<AnimalSearchProps> = ({
         <button
           onClick={onShowCalendar}
           className="bg-purple-600 text-white rounded-full px-4 py-3 font-semibold shadow-lg hover:bg-purple-700 transition-colors flex items-center justify-center"
+          data-testid="btn-calendar"
         >
           <NotebookTabs className="h-5 w-5 mr-2" />
           スケジュール
@@ -97,6 +101,7 @@ const AnimalSearch: React.FC<AnimalSearchProps> = ({
         <button
           onClick={() => setShowFarmList(!showFarmList)}
           className="bg-green-600 text-white rounded-full px-4 py-3 font-semibold shadow-lg hover:bg-green-700 transition-colors flex items-center justify-center"
+          data-testid="btn-farm-list"
         >
           <Building className="h-5 w-5 mr-2" />
           牧場一覧から探す
@@ -106,6 +111,7 @@ const AnimalSearch: React.FC<AnimalSearchProps> = ({
         <button
           onClick={onShowNewAnimalForm}
           className="text-blue-600 font-bold hover:underline transition-colors flex items-center justify-center mx-auto"
+          data-testid="btn-new-animal"
         >
           <PlusCircle className="h-5 w-5 mr-2" />
           新規登録はこちら

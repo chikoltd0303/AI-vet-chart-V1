@@ -1,0 +1,629 @@
+﻿from dotenv import load_dotenv
+import os
+import base64
+import uuid
+import json
+from pathlib import Path
+from datetime import datetime
+from typing import List
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+import json
+
+# ローカルのモジュールをインポ�EチE
+from database import DB
+from Calendar import create_calendar_event, GenericCalendarProvider
+from schemas import Animal, Record, UploadResponse, SoapNotes, AnimalDetailData
+from storage import save_file
+from audio_service import GoogleAudioService
+from ai_service import GoogleAIService
+
+# --- アプリケーションの初期設定と認証 ---
+
+# .envファイルをローチE
+load_dotenv()
+
+# GEMINI_API_KEY のエイリアス対応（どちら�E変数名でも可�E�E
+if not os.getenv("GOOGLE_GEMINI_API_KEY") and os.getenv("GEMINI_API_KEY"):
+    os.environ["GOOGLE_GEMINI_API_KEY"] = os.getenv("GEMINI_API_KEY")
+
+def write_service_account_file():
+    If GOOGLE_SERVICE_ACCOUNT_B64 env var is set, decode and write to service_account.json.
+    b64_str = os.getenv("GOOGLE_SERVICE_ACCOUNT_B64")
+    if b64_str and not os.path.exists("service_account.json"):
+        try:
+            data = base64.b64decode(b64_str)
+            with open("service_account.json", "wb") as fh:
+                fh.write(data)
+            print("Wrote service_account.json from env var")
+        except Exception as e:
+            print("Failed to write service account:", e)
+
+# サービスアカウントキーファイルを書き�EぁE
+write_service_account_file()
+
+# Google Cloudの認証惁E��を環墁E��数に設宁E
+if os.path.exists("service_account.json"):
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "service_account.json"
+    print("GOOGLE_APPLICATION_CREDENTIALS environment variable is set.")
+else:
+    print("service_account.json was not found. Authentication may fail.")
+
+# Google API サービスインスタンスを作�E
+# グローバル変数として定義
+google_audio_service: GoogleAudioService = None
+google_ai_service: GoogleAIService = None
+
+# チE�Eタベ�Eスの初期匁E
+try:
+    DB.load_from_sheets()
+except Exception as e:
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    print("FATAL ERROR: Failed to load data from sheets.")
+    import traceback
+    traceback.print_exc()
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
+# 環墁E��数を�Eリントして確誁E(チE��チE��用)
+print(f"GOOGLE_SERVICE_ACCOUNT_B64 is set: {bool(os.getenv('GOOGLE_SERVICE_ACCOUNT_B64'))}")
+print(f"GOOGLE_GEMINI_API_KEY is set: {bool(os.getenv('GOOGLE_GEMINI_API_KEY'))}")
+print(f"SPREADSHEET_ID is set: {bool(os.getenv('SPREADSHEET_ID'))}")
+
+
+# --- FastAPI アプリケーションとエンド�EインチE---
+
+app = FastAPI(title="AI Vet Chart Backend (Google Cloud APIs)")
+
+# 簡易�EルスチェチE��
+@app.get("/health")
+async def health():
+    return {
+        "status": "ok",
+        "apis": "google_cloud",
+        "gemini_key": bool(os.getenv("GOOGLE_GEMINI_API_KEY")),
+    }
+
+# アプリケーション起動時にサービスを�E期化
+@app.on_event("startup")
+async def startup_event():
+    global google_audio_service, google_ai_service
+    # 認証が完亁E��た後にインスタンスを作�E
+    google_audio_service = GoogleAudioService()
+    # ここでaudio_serviceを渡ぁE
+    google_ai_service = GoogleAIService(audio_service=google_audio_service)
+    print("Google Audio and AI services initialized on startup.")
+
+# uploadsフォルダを静皁E��ァイルとして公閁E
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
+# CORS設宁E
+origins = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3000",
+    "https://*.codespaces.github.dev",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_origin_regex=r"^https://.*\.app\.github\.dev$",
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/api/animals")
+async def list_animals(query: str = ""):
+    if not query:
+        return list(DB.animals.values())
+    return DB.search_animals(query)
+
+
+@app.get("/api/animals/{animal_id}", response_model=AnimalDetailData)
+async def get_animal(animal_id: str):
+    """個別の動物の詳細を取征E""
+    animal = DB.get_animal(animal_id)
+    if not animal:
+        raise HTTPException(status_code=404, detail="Animal not found")
+    
+    records = DB.get_records_for_animal(animal_id)
+    summary = DB.generate_summary(animal_id)
+
+    return {
+        "animal": animal,
+        "records": records,
+        "summary": summary
+    }
+
+
+@app.post("/api/animals")
+async def create_animal(
+    microchip_number: str = Form(...),
+    name: str = Form(...),
+    age: int = Form(None),
+    sex: str = Form(None),
+    breed: str = Form(None),
+    owner: str = Form(None),
+    user_id: str = Form("guest"),   # 👈 追加
+    file: UploadFile = File(None),
+):
+    thumbnail_url = None
+    if file:
+        data = await file.read()
+        url, key = save_file(data, filename=f"animal_{microchip_number}_{file.filename}")
+        thumbnail_url = url
+    
+    animal = Animal(
+        id=microchip_number,
+        microchip_number=microchip_number,
+        name=name,
+        age=age,
+        sex=sex,
+        breed=breed,
+        thumbnailUrl=thumbnail_url,
+        owner=owner,
+    )
+    
+    DB.add_animal(animal)   # 👈 user_id を渡ぁE
+    return animal
+
+
+@app.post("/api/uploads/images")
+async def upload_image(file: UploadFile = File(...)):
+    data = await file.read()
+    url, key = save_file(data, filename=f"img_{uuid.uuid4().hex}_{file.filename}")
+    return UploadResponse(url=url, key=key)
+
+
+@app.post("/api/transcribe")
+async def transcribe_audio(audio: UploadFile = File(...)):
+    """Transcribe an uploaded audio file using Google Speech-to-Text."""
+    try:
+        if google_audio_service is None:
+            raise HTTPException(status_code=500, detail="Audio service not initialized")
+
+        if not audio.filename:
+            raise HTTPException(status_code=400, detail="音声ファイルが選択されてぁE��せん")
+
+        if not google_audio_service.is_audio_file(audio.filename):
+            # 拡張性のため、サポ�EトされてぁE��形式をリストで取征E
+            supported_formats = google_audio_service.get_supported_formats()
+            if isinstance(supported_formats, dict):
+                formats = supported_formats.get("supported_formats", [])
+            else:
+                formats = supported_formats
+            
+            raise HTTPException(
+                status_code=400, 
+                detail=f"サポ�EトされてぁE��ぁE��ァイル形式です。対応形弁E {', '.join(formats)}"
+            )
+        
+        # ファイル形式�E確認！Eackend_fixes.pyからの追加�E�E
+        audio_extensions = ['.wav', '.mp3', '.ogg', '.webm', '.flac', '.m4a', '.mp4']
+        file_extension = Path(audio.filename).suffix.lower()
+        
+        if file_extension not in audio_extensions:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"サポ�EトされてぁE��ぁE��ァイル形式です。対応形弁E {', '.join(audio_extensions)}"
+            )
+        
+        audio_data = await audio.read()
+        
+        if len(audio_data) > 25 * 1024 * 1024:  # backend_fixes.pyに合わせて25MB制限に変更
+            raise HTTPException(
+                status_code=400, 
+                detail="ファイルサイズは25MB以下にしてください、E
+            )
+        
+        transcribed_text = google_audio_service.transcribe_audio_data(audio_data, audio.filename)
+        
+        if not transcribed_text:
+            raise HTTPException(status_code=500, detail="音声の転写に失敗しました")
+        
+        return {
+            "transcription": transcribed_text,  # backend_fixes.pyの形式に合わせる
+            "transcribed_text": transcribed_text,  # 既存�Eコードとの互換性のため
+            "filename": audio.filename,
+            "file_size": len(audio_data),  # backend_fixes.pyからの追加
+            "status": "success",
+            "service": "google_speech_to_text"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"音声転写エラー: {e}")
+        raise HTTPException(status_code=500, detail="音声ファイルの処琁E��にエラーが発生しました")
+
+
+@app.post("/api/generateSoap")
+async def generate_soap_endpoint(audio: UploadFile = File(None), transcribed_text: str = Form(None)):
+    """Generate SOAP notes from audio or provided text using Google APIs."""
+    try:
+        if google_ai_service is None or google_audio_service is None:
+             raise HTTPException(status_code=500, detail="AI services not initialized")
+        
+        if audio:
+            if not google_audio_service.is_audio_file(audio.filename):
+                raise HTTPException(status_code=400, detail="サポ�EトされてぁE��ぁE��ァイル形式でぁE)
+            
+            audio_data = await audio.read()
+            if len(audio_data) > 25 * 1024 * 1024:  # backend_fixes.pyに合わせて25MB制陁E
+                raise HTTPException(status_code=400, detail="音声ファイルが大きすぎまぁE)
+            
+            # audio_urlはS3/GCSに保存されたURLを想宁E
+            audio_url, _ = save_file(audio_data, filename=f"audio_{uuid.uuid4().hex}_{audio.filename}")
+            
+            # 冁E��で音声転写とAI要紁E��実衁E
+            soap_notes = google_ai_service.generate_soap_from_audio(audio_url, transcribed_text)
+            
+            return {
+                "soap_notes": soap_notes.model_dump(),
+                "audio_url": audio_url,
+                "source": "audio",
+                "status": "success",
+                "service": "google_apis"
+            }
+        
+        elif transcribed_text:
+            soap_notes = google_ai_service.generate_soap_from_text(transcribed_text)
+            
+            return {
+                "soap_notes": soap_notes.model_dump(),
+                "source": "text",
+                "status": "success",
+                "service": "google_gemini"
+            }
+        
+        else:
+            raise HTTPException(status_code=400, detail="音声ファイルまた�EチE��スト�EぁE��れかが忁E��でぁE)
+    except Exception as e:
+        print(f"SOAP生�Eエラー: {e}")
+        raise HTTPException(status_code=500, detail="SOAP生�E中にエラーが発生しました")
+
+
+@app.post("/api/generateSoapFromText")
+async def generate_soap_from_text_endpoint(text: str = Form(...)):
+    """チE��ストからSOAPノ�Eトを生�Eするエンド�Eイント！Eoogle Gemini使用�E�E""
+    try:
+        if google_ai_service is None:
+            raise HTTPException(status_code=500, detail="AI service not initialized")
+        
+        if not text.strip():
+            raise HTTPException(status_code=400, detail="チE��ストが入力されてぁE��せん")
+        
+        soap_notes = google_ai_service.generate_soap_from_text(text)
+        
+        return {
+            "soap_notes": soap_notes.model_dump(),
+            "original_text": text,
+            "status": "success",
+            "service": "google_gemini"
+        }
+    except Exception as e:
+        print(f"チE��ストから�ESOAP生�Eエラー: {e}")
+        raise HTTPException(status_code=500, detail="SOAP生�E中にエラーが発生しました")
+
+
+@app.post("/api/generateSummary")
+async def generate_summary(request: dict):
+    動物の診療記録からAIサマリーを生成するエンド�EインチE
+    try:
+        if google_ai_service is None:
+            raise HTTPException(status_code=500, detail="AI service not initialized")
+        
+        microchip = request.get('microchip_number')
+        if not microchip:
+            raise HTTPException(status_code=400, detail="マイクロチップ番号が忁E��でぁE)
+        
+        # 動物チE�Eタの取征E
+        animal = DB.get_animal(microchip)
+        if not animal:
+            raise HTTPException(status_code=404, detail="持E��された動物が見つかりません")
+        
+        records = DB.get_records_for_animal(microchip)
+        
+        if not records:
+            return {"summary": f"{animal.name}の診療記録はまだありません、E}
+        
+        # 診療記録を整琁E��最新5件�E�E
+        recent_records = sorted(records, key=lambda x: x.date if hasattr(x, 'date') else '', reverse=True)[:5]
+        
+        # プロンプトを作�E
+        records_text = ""
+        for i, record in enumerate(recent_records, 1):
+            # recordの日付フォーマットを調整
+            record_date = getattr(record, 'date', 'Unknown')
+            if hasattr(record_date, 'isoformat'):
+                record_date = record_date.isoformat()[:10]
+            elif isinstance(record_date, str) and len(record_date) >= 10:
+                record_date = record_date[:10]
+            
+            records_text += f"\n=== 診療記録 {i} ({record_date}) ===\n"
+            soap = record.soap
+            records_text += f"S: {getattr(soap, 's', getattr(soap, 'subjective', ''))}\n"
+            records_text += f"O: {getattr(soap, 'o', getattr(soap, 'objective', ''))}\n"
+            records_text += f"A: {getattr(soap, 'a', getattr(soap, 'assessment', ''))}\n"
+            records_text += f"P: {getattr(soap, 'p', getattr(soap, 'plan', ''))}\n"
+        
+        prompt = f"""
+        あなた�E優秀な獣医師です。以下�E診療情報を�E析し、E��ぁE��と他�E獣医師がすぐに状況を把握できるよう、E��要なポイントを箁E��書きで3点に要紁E��てください、E
+
+        # 動物惁E��
+        - 名前: {animal.name}
+        - 品種: {getattr(animal, 'breed', 'Unknown')}
+        - 性別: {getattr(animal, 'sex', 'Unknown')}
+        - 年齢: {getattr(animal, 'age', 'Unknown')}
+
+        # 持E��
+        - 現在の最も重要な健康課題を1点挙げてください、E1-2衁E
+        - これまでの主要な治療や検査めE点挙げてください、E1-2衁E
+        - 今後最も注意すべきことめE点挙げてください、E1衁E
+        - 全体�E80斁E��以冁E��まとめてください、E
+
+        例！E
+        ・右後肢の跛行が続いており、跛行スコアは3/5です、E
+        ・X線検査の結果、E��節炎と診断し、抗炎症薬を投与中です、E
+        ・体重管琁E��継続し、激しい運動は避けるようにしてください、E
+        
+        print(f"=== サマリー生�E開姁E===")
+        print(f"動物: {animal.name} ({microchip})")
+        print(f"記録件数: {len(records)}")
+        
+        # Google Gemini APIを使用してサマリー生�E
+        summary = google_ai_service.generate_summary_from_text(prompt)
+        
+        print(f"✁Eサマリー生�E完亁E {len(summary)}斁E��E)
+        
+        return {
+            "summary": summary,
+            "records_count": len(records),
+            "animal_name": animal.name
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"サマリー生�Eエラー: {e}")
+        raise HTTPException(status_code=500, detail="サマリーの生�E中にエラーが発生しました")
+
+
+@app.post("/api/records")
+async def create_record(
+    animalId: str = Form(...),
+    soap_json: str = Form(None),
+    audio: UploadFile = File(None),
+    images: List[UploadFile] = File(None),
+    auto_transcribe: bool = Form(False),
+    # backend_fixes.pyからの追加パラメータ
+    microchip: str = Form(None),
+    soap_s: str = Form(""),
+    soap_o: str = Form(""),
+    soap_a: str = Form(""),
+    soap_p: str = Form(""),
+    next_visit_date: str = Form(None),
+    next_visit_time: str = Form(None),
+    image_base64s: List[str] = Form([]),
+    image_names: List[str] = Form([]),
+    user_id: str = Form("guest"),   # 👈 追加
+):
+    """診療記録を作�E�E�Eoogle APIs使用、backend_fixes.pyの改喁E��統合！E""
+    try:
+        print(f"=== 画像�E琁E��バッグ ===")
+        print(f"images パラメータ: {images}")
+        print(f"image_base64s: {len(image_base64s) if image_base64s else 0}件")
+        print(f"image_names: {len(image_names) if image_names else 0}件")
+
+        if google_audio_service is None or google_ai_service is None:
+            raise HTTPException(status_code=500, detail="Services not initialized")
+        
+        # マイクロチップ番号の取得！EnimalIdまた�Emicrochipパラメータから�E�E
+        target_id = microchip if microchip else animalId
+        
+        # 既存�E動物チE�Eタ取征E
+        animal = DB.get_animal(target_id)
+        if not animal:
+            raise HTTPException(status_code=404, detail="持E��されたマイクロチップ番号の動物が見つかりません")
+        
+        # SOAP記録の処琁E
+        soap = None
+        if soap_json:
+            try:
+                soap_dict = json.loads(soap_json)
+                soap = SoapNotes(**soap_dict)
+            except Exception as e:
+                raise HTTPException(status_code=400, detail=f"Invalid soap_json: {e}")
+        elif soap_s or soap_o or soap_a or soap_p:
+            # backend_fixes.pyスタイルのSOAPチE�Eタから作�E
+            soap = SoapNotes(\n                s=soap_s,\n                o=soap_o,\n                a=soap_a,\n                p=soap_p\n            )
+
+        # 画像�E琁E- Base64チE�Eタまた�EアチE�Eロードファイルから�E�Eackend_fixes.pyから統合！E
+        image_urls = []
+        processed_images = []
+        
+        # Base64チE�Eタから画像を処琁E
+        if image_base64s and image_names:
+            for base64_data, name in zip(image_base64s, image_names):
+                if base64_data:
+                    processed_images.append({
+                        'name': name,
+                        'data': base64_data,
+                        'size': len(base64_data)
+                    })
+                    # Base64チE�Eタをファイルとして保存（忁E��に応じて�E�E
+                    try:
+                        image_data = base64.b64decode(base64_data.split(',')[1] if ',' in base64_data else base64_data)
+                        url, key = save_file(image_data, filename=f"b64_{uuid.uuid4().hex}_{name}")
+                        image_urls.append(url)
+                    except Exception as e:
+                        print(f"Base64画像�E処琁E��ラー: {e}")
+        
+        # アチE�Eロードファイルから画像を処琁E
+        if images:
+            for image_file in images:
+                if image_file.filename:
+                    image_content = await image_file.read()
+                    base64_data = base64.b64encode(image_content).decode('utf-8')
+                    mime_type = image_file.content_type or 'image/jpeg'
+                    
+                    processed_images.append({
+                        'name': image_file.filename,
+                        'data': f'data:{mime_type};base64,{base64_data}',
+                        'size': len(image_content)
+                    })
+                    
+                    url, key = save_file(image_content, filename=f"rec_{uuid.uuid4().hex}_{image_file.filename}")
+                    image_urls.append(url)
+
+        audio_url = None
+        transcribed_text = None
+        print(f"処琁E��亁E- image_urls: {len(image_urls)}倁E)
+        print(f"image_urls冁E��: {image_urls}")
+        
+        if audio:
+            data = await audio.read()
+            if len(data) > 25 * 1024 * 1024:  # backend_fixes.pyに合わせて25MB制陁E
+                raise HTTPException(status_code=400, detail="音声ファイルが大きすぎます、E5MB以下にしてください、E)
+            
+            audio_url, key = save_file(data, filename=f"audio_{uuid.uuid4().hex}_{audio.filename}")
+            
+            if auto_transcribe and not soap:
+                print("Google APIs使用 - 音声の自動転写とAI要紁E��実行中...")
+                transcribed_text = google_audio_service.transcribe_audio_data(data, audio.filename)
+                
+                if transcribed_text:
+                    soap = google_ai_service.generate_soap_from_text(transcribed_text)
+                    print(f"Google Gemini AI要紁E��亁E {soap}")
+                else:
+                    print("Google Speech-to-Text による音声転写に失敗しました")
+
+        record_id = uuid.uuid4().hex
+        if not soap:
+            soap = SoapNotes()
+
+        # 診療記録作�E
+        record = Record(
+            id=record_id, 
+            animalId=target_id, 
+            soap=soap, 
+            images=image_urls, 
+            audioUrl=audio_url
+        )
+
+        # 次回予紁E��時�E設定！Eackend_fixes.pyから追加�E�E
+        if next_visit_date:
+            record.next_visit_date = next_visit_date
+        if next_visit_time:
+            record.next_visit_time = next_visit_time
+
+        DB.add_record(record)   # 👈 user_id を渡ぁE
+
+        
+        return {
+            "record": record,
+            "transcribed_text": transcribed_text,
+            "auto_transcribe": auto_transcribe,
+            "processed_images": processed_images,  # backend_fixes.pyの形弁E
+            "record_id": record_id,  # backend_fixes.pyの形弁E
+            "message": "記録が正常に保存されました",  # backend_fixes.pyの形弁E
+            "status": "success",
+            "api_used": "google_cloud_apis",
+            # 👈 応答にも含めるとチE��チE��しやすい
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"記録作�Eエラー: {e}")
+        raise HTTPException(status_code=500, detail=f"記録の保存中にエラーが発生しました: {str(e)}")
+
+
+@app.post("/api/addRecord", response_model=UploadResponse)
+def add_record_endpoint(record: Record):
+    """Add a new medical record and optionally create a calendar event."""
+        soap_data = record.soap.model_dump()
+        description_text = (
+            f"S: {soap_data.get('subjective', 'チE�EタなぁE)}\n"
+            f"O: {soap_data.get('objective', 'チE�EタなぁE)}\n"
+            f"A: {soap_data.get('assessment', 'チE�EタなぁE)}\n"
+            f"P: {soap_data.get('plan', 'チE�EタなぁE)}"
+        )
+
+        animal = DB.get_animal(record.animalId)
+        animal_name = animal.name if animal else "不�Eな動物"
+
+        DB.add_record(record)
+        
+        if hasattr(record, 'next_visit_date') and record.next_visit_date:
+            print(f"次回�E診療予定をGoogleカレンダーに登録しまぁE {record.next_visit_date}")
+            create_calendar_event(
+                title=f"{animal_name}の次回診癁E,
+                start_date=record.next_visit_date,
+                description=f"動物吁E {animal_name}\n診療記録:\n{description_text}",
+                provider=GenericCalendarProvider.GOOGLE_CALENDAR
+            )
+        
+        return UploadResponse(message="Record uploaded successfully.")
+    except Exception as e:
+        print(f"エラーが発生しました: {e}")
+        raise HTTPException(status_code=500, detail="An internal server error occurred.")
+
+
+@app.get("/health")
+async def health():
+    return JSONResponse({"status": "ok", "apis": "google_cloud"})
+
+
+@app.get("/debug/animals")
+async def debug_animals():
+    return {
+        "all_animals": list(DB.animals.keys()),
+        "animal_data": {k: {"name": v.name, "id": v.id} for k, v in DB.animals.items()}
+    }
+
+
+@app.get("/api/debug/google-apis")
+async def debug_google_apis():
+    """Google APIs設定状況を確誁E""
+    return {
+        "google_service_account": bool(os.getenv('GOOGLE_SERVICE_ACCOUNT_B64')),
+        "gemini_api_key": bool(os.getenv('GOOGLE_GEMINI_API_KEY')),
+        "spreadsheet_id": bool(os.getenv('SPREADSHEET_ID')),
+        "service_account_file": os.path.exists("service_account.json"),
+        "supported_audio_formats": google_audio_service.get_supported_formats() if google_audio_service else [],
+        "services": {
+            "speech_to_text": "Google Cloud Speech-to-Text",
+            "ai_summarization": "Google Gemini 1.5 Flash (無料版)",
+            "data_storage": "Google Sheets"
+        }
+    }
+
+
+@app.get("/api/debug/audio-formats")
+async def get_supported_audio_formats():
+    """サポ�EトされてぁE��音声形式を返す�E�Eoogle Cloud Speech-to-Text�E�E""
+    if google_audio_service is None:
+        raise HTTPException(status_code=500, detail="Audio service not initialized")
+        
+    formats_info = google_audio_service.get_supported_formats()
+    return {
+        "supported_formats": formats_info.get("supported_formats", []) if isinstance(formats_info, dict) else formats_info,
+        "max_file_size": "25MB",  # backend_fixes.pyに合わせて更新
+        "language": "ja-JP (日本誁E",
+        "service": "Google Cloud Speech-to-Text",
+        "model": "医療用拡張モチE��対忁E
+    }
+
+
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+
+

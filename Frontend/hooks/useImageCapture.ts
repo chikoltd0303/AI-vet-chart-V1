@@ -1,3 +1,4 @@
+
 // hooks/useImageCapture.ts
 import { useState, useRef, useCallback } from 'react';
 import type { ImageCaptureState, ImageCaptureActions } from '@/types/hooks';

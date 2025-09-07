@@ -1,59 +1,54 @@
-import { MOCK_DB } from "@/data/mockDB";
+﻿import { MOCK_DB } from "@/data/mockDB";
 import type { Appointment } from "@/types";
 import type { AppointmentWithAnimalInfo } from "@/types";
 import { api } from "./api";
 
-// 予約データを更新する関数（現在はモックデータを使用、将来的にAPI対応）
+// 莠育ｴ・ョ繝ｼ繧ｿ繧呈峩譁ｰ縺吶ｋ髢｢謨ｰ・育樟蝨ｨ縺ｯ繝｢繝・け繝・・繧ｿ繧剃ｽｿ逕ｨ縲∝ｰ・擂逧・↓API蟇ｾ蠢懶ｼ・
 export const updateAppointments = async (): Promise<{ [key: string]: AppointmentWithAnimalInfo[] }> => {
   try {
-    // 将来的にAPIが実装されたら以下を有効化
-    // const appointmentsData = await api.getAppointments();
-    // return appointmentsData;
-    
-    // 現在はモックデータから生成
+    const appointmentsData = await api.getAppointments();
+    const grouped: { [key: string]: AppointmentWithAnimalInfo[] } = {} as any;
+    (appointmentsData as any[]).forEach((a: any) => {
+      const date = a.date;
+      if (!grouped[date]) grouped[date] = [];
+      grouped[date].push(a);
+    });
+    return grouped;
+  } catch (error) {
+    console.error("Failed to fetch appointments from API:", error);
+    // Fallback to mock DB
     const allAppointments: { [key: string]: AppointmentWithAnimalInfo[] } = {};
-    
     for (const microchipNumber in MOCK_DB.records) {
       const animal = MOCK_DB.animals[microchipNumber];
       const records = MOCK_DB.records[microchipNumber];
-      
-      if (!animal || !animal.farm_id) continue; // farm_idがundefinedの場合はスキップ
-      
+      if (!animal || !animal.farm_id) continue;
       records.forEach((record, index) => {
         if (record.next_visit_date && animal.farm_id) {
           const dateTime = new Date(record.next_visit_date);
           const date = record.next_visit_date.split("T")[0];
-          const time = dateTime.toTimeString().slice(0, 5); // HH:MM形式
-          
-          if (!allAppointments[date]) {
-            allAppointments[date] = [];
-          }
-          
+          const time = dateTime.toTimeString().slice(0, 5);
+          if (!allAppointments[date]) { allAppointments[date] = []; }
           allAppointments[date].push({
-            id: `${microchipNumber}-${index}`, // ユニークなIDを生成
+            id: `${microchipNumber}-${index}`,
             microchip_number: microchipNumber,
             animal_name: animal.name,
             farm_id: animal.farm_id,
-            date: date,
-            time: time,
+            date,
+            time,
             summary: record.soap.a,
             next_visit_date: record.next_visit_date,
-          });
+          } as any);
         }
       });
     }
-    
     return allAppointments;
-  } catch (error) {
-    console.error("Failed to update appointments:", error);
-    return {};
   }
 };
 
-// 農場リストを生成する関数（モックデータ + カスタム農場対応）
+// 霎ｲ蝣ｴ繝ｪ繧ｹ繝医ｒ逕滓・縺吶ｋ髢｢謨ｰ・医Δ繝・け繝・・繧ｿ + 繧ｫ繧ｹ繧ｿ繝霎ｲ蝣ｴ蟇ｾ蠢懶ｼ・
 export const generateFarmList = (): string[] => {
   try {
-    // モックデータから農場リストを生成
+    // 繝｢繝・け繝・・繧ｿ縺九ｉ霎ｲ蝣ｴ繝ｪ繧ｹ繝医ｒ逕滓・
     const farms = new Set<string>();
     Object.values(MOCK_DB.animals).forEach((animal) => {
       if (animal.farm_id) {
@@ -63,7 +58,7 @@ export const generateFarmList = (): string[] => {
     
     const mockFarms = Array.from(farms).sort((a, b) => a.localeCompare(b, "ja"));
     
-    // LocalStorageから追加の農場を取得（あれば）
+    // LocalStorage縺九ｉ霑ｽ蜉縺ｮ霎ｲ蝣ｴ繧貞叙蠕暦ｼ医≠繧後・・・
     const storedFarms = localStorage.getItem("customFarms");
     if (storedFarms) {
       const customFarms = JSON.parse(storedFarms) as string[];
@@ -78,7 +73,7 @@ export const generateFarmList = (): string[] => {
   }
 };
 
-// 農場を追加する関数
+// 霎ｲ蝣ｴ繧定ｿｽ蜉縺吶ｋ髢｢謨ｰ
 export const addFarm = (farmName: string): void => {
   try {
     const storedFarms = localStorage.getItem("customFarms");
@@ -97,7 +92,7 @@ export const addFarm = (farmName: string): void => {
   }
 };
 
-// 予約を日付別にグループ化する関数
+// 莠育ｴ・ｒ譌･莉伜挨縺ｫ繧ｰ繝ｫ繝ｼ繝怜喧縺吶ｋ髢｢謨ｰ
 export const groupAppointmentsByDate = (appointments: Appointment[]): { [key: string]: Appointment[] } => {
   return appointments.reduce((groups, appointment) => {
     const date = appointment.date;
@@ -109,13 +104,13 @@ export const groupAppointmentsByDate = (appointments: Appointment[]): { [key: st
   }, {} as { [key: string]: Appointment[] });
 };
 
-// 今日の予約を取得する関数
+// 莉頑律縺ｮ莠育ｴ・ｒ蜿門ｾ励☆繧矩未謨ｰ
 export const getTodayAppointments = (appointments: { [key: string]: Appointment[] }): Appointment[] => {
   const today = new Date().toISOString().split('T')[0];
   return appointments[today] || [];
 };
 
-// 特定の日の予約を取得する関数
+// 迚ｹ螳壹・譌･縺ｮ莠育ｴ・ｒ蜿門ｾ励☆繧矩未謨ｰ
 export const getAppointmentsForDate = (
   appointments: { [key: string]: Appointment[] }, 
   date: string
@@ -123,7 +118,7 @@ export const getAppointmentsForDate = (
   return appointments[date] || [];
 };
 
-// 予約数を取得する関数
+// 莠育ｴ・焚繧貞叙蠕励☆繧矩未謨ｰ
 export const getAppointmentCount = (
   appointments: { [key: string]: Appointment[] }, 
   date: string
@@ -131,7 +126,7 @@ export const getAppointmentCount = (
   return (appointments[date] || []).length;
 };
 
-// 週間予約を取得する関数（追加のユーティリティ）
+// 騾ｱ髢謎ｺ育ｴ・ｒ蜿門ｾ励☆繧矩未謨ｰ・郁ｿｽ蜉縺ｮ繝ｦ繝ｼ繝・ぅ繝ｪ繝・ぅ・・
 export const getWeeklyAppointments = (
   appointments: { [key: string]: Appointment[] },
   startDate: Date
