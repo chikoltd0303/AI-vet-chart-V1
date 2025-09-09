@@ -9,6 +9,9 @@ __pycache__/
 .env.local
 **/.env.local
 Frontend/.env.local
+AI-vet-chart-V1-clean
+backups
+service_account.b64.txt
 
 # Next.js build output
 # Next.js build output

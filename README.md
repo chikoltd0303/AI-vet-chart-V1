@@ -14,6 +14,12 @@ This repository contains:
 
 Requirements: Python with `uvicorn` available, and `pnpm` or `npm` for the frontend.
 
+### Stop background jobs (PowerShell)
+- List jobs: `Get-Job`
+- Stop both: `Stop-Job -Name backend,frontend`
+
+If ports are still in use, ensure jobs are stopped or close your terminal sessions that started them.
+
 ## E2E tests (from Frontend directory)
 
 ```powershell
@@ -28,3 +34,9 @@ Environment variables used by tests:
 
 See `Backend/README.md` and `Frontend/README.md` for details.
 
+### Windows display tips (mojibake)
+- If you see garbled Japanese output in PowerShell, try: `chcp 65001` before running commands, or use Windows Terminal with UTF-8.
+
+### Credentials hygiene
+- Prefer using `GOOGLE_SERVICE_ACCOUNT_B64` (Base64 of service_account.json) instead of committing the raw JSON. The repo `.gitignore` already ignores `service_account.json` and `*.b64`, but avoid keeping real keys in the repo directory.
+- Backend auto-wires `service_account.json` at startup when `GOOGLE_SERVICE_ACCOUNT_B64` is present.

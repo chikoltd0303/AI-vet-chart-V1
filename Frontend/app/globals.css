@@ -7,6 +7,11 @@
   --foreground: #171717;
 }
 
+/* Fluid type: shrink base font on narrow screens, cap on desktop */
+html {
+  font-size: clamp(13px, 3.5vw, 16px);
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;

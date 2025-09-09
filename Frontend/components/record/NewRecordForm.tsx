@@ -2,6 +2,7 @@
 import type { SoapNotes, Appointment } from "@/types";
 import { Mic, MicOff, Upload, Loader2, Calendar as CalendarIcon, Save, Camera, X, Sparkles } from "lucide-react";
 import MiniCalendar from "@/components/calendar/MiniCalendar";
+import VetCalendar from "@/components/calendar/VetCalendar";
 import { TIME_OPTIONS } from "@/lib/utils";
 import { api } from "@/lib/api";
 import { useAudioRecording } from "@/hooks/useAudioRecording";
@@ -66,6 +67,8 @@ const NewRecordForm: React.FC<NewRecordFormProps> = (
   const [nextVisitDate, setNextVisitDate] = useState<string>("");
   const [nextVisitTime, setNextVisitTime] = useState<string>("");
   const today = useMemo(() => new Date().toISOString().split("T")[0], []);
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [calendarMode, setCalendarMode] = useState<'list'|'month'>("list");
 
   // バリデーション
   const validateForm = () => {
@@ -73,7 +76,7 @@ const NewRecordForm: React.FC<NewRecordFormProps> = (
     if (!soap.s && !soap.o && !soap.a && !soap.p) {
       e.push("最低でも1つのSOAP項目（S/O/A/P）を入力してください。");
     }
-    if (nextVisitDate && !nextVisitTime) {
+    if (false && nextVisitDate && !nextVisitTime) {
       e.push("次回予約日を設定した場合、時間も選択してください。");
     }
     if (nextVisitTime && !nextVisitDate) {
@@ -182,6 +185,8 @@ const NewRecordForm: React.FC<NewRecordFormProps> = (
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 2500);
       if (nextVisitDate && nextVisitTime && onAppointmentsUpdate) onAppointmentsUpdate();
+      // 時刻未選択でも更新をトリガー
+      if (nextVisitDate && onAppointmentsUpdate) onAppointmentsUpdate();
       // reset
       setSoap({ s: "", o: "", a: "", p: "" });
       setImages([]);
@@ -372,7 +377,84 @@ const NewRecordForm: React.FC<NewRecordFormProps> = (
               </select>
             </div>
           </div>
-          <MiniCalendar appointments={appointments} selectedDate={nextVisitDate || today} onDateChange={(d) => setNextVisitDate(d)} currentDate={todayDate} />
+          <div className="flex flex-col md:flex-row items-start gap-2 md:gap-3">
+            <MiniCalendar appointments={appointments} selectedDate={nextVisitDate || today} onDateChange={(d) => setNextVisitDate(d)} currentDate={todayDate} />
+            <button
+              type="button"
+              onClick={() => setShowCalendarModal(true)}
+              className="h-9 md:h-10 px-3 mt-1 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition w-full md:w-auto"
+            >
+              カレンダー拡大
+            </button>
+          </div>
+
+          {showCalendarModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center">
+              <div className="absolute inset-0 bg-black/50" onClick={() => setShowCalendarModal(false)} />
+              <div className="relative bg-white w-screen h-screen md:w-[95vw] md:max-w-4xl md:max-h-[90vh] md:h-auto rounded-none md:rounded-lg shadow-lg p-2 md:p-4 overflow-auto">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-base md:text-lg font-bold text-gray-900">スケジュール（拡大表示）</h3>
+                  <button onClick={() => setShowCalendarModal(false)} className="text-gray-600 hover:text-black text-xl leading-none">×</button>
+                </div>
+                <div className="mb-2 flex gap-2">
+                  <button
+                    type="button"
+                    className={`px-3 py-1 rounded border ${calendarMode==='list'?'bg-purple-600 text-white border-purple-600':'bg-white text-gray-800 border-gray-300'}`}
+                    onClick={() => setCalendarMode('list')}
+                  >一覧</button>
+                  <button
+                    type="button"
+                    className={`px-3 py-1 rounded border ${calendarMode==='month'?'bg-purple-600 text-white border-purple-600':'bg-white text-gray-800 border-gray-300'}`}
+                    onClick={() => setCalendarMode('month')}
+                  >月表示</button>
+                  <div className="ml-auto flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setNextVisitDate(today)}
+                      className="px-3 py-1 rounded bg-gray-100 text-gray-800 hover:bg-gray-200"
+                    >今日へ</button>
+                  </div>
+                </div>
+                {calendarMode === 'list' ? (
+                  <div className="border rounded-md p-2 text-[15px] md:text-base">
+                    <h4 className="font-semibold mb-2">{(nextVisitDate || today)} の予定</h4>
+                    <div className="max-h-[70vh] overflow-auto divide-y">
+                      {((appointments[nextVisitDate || today] || []) as any[]).length > 0 ? (
+                        ((appointments[nextVisitDate || today] || []) as any[])
+                          .slice()
+                          .sort((a: any,b: any)=> (a.time||'').localeCompare(b.time||''))
+                          .map((app: any, idx: number) => (
+                            <div key={idx} className="py-2">
+                              <div className="text-blue-700 font-semibold">
+                                {(app.time ? `${app.time} ` : "") + (app.animal_name || "")}
+                              </div>
+                              {app.farm_id && (
+                                <div className="text-[13px] text-gray-700">{app.farm_id}</div>
+                              )}
+                            </div>
+                          ))
+                      ) : (
+                        <div className="py-6 text-center text-gray-600">この日に予定はありません</div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="border rounded-md p-2">
+                    <VetCalendar
+                      onBack={() => setShowCalendarModal(false)}
+                      onHome={() => setShowCalendarModal(false)}
+                      appointments={appointments}
+                      onDateClick={(d: string) => setNextVisitDate(d)}
+                      currentDate={todayDate}
+                      compact={true}
+                      maxPerDay={2}
+                      showFarm={true}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 送信ボタン */}

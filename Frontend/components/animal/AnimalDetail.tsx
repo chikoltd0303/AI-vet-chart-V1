@@ -175,8 +175,8 @@ const AnimalDetail: React.FC<AnimalDetailProps> = ({
     setIsUpdating(true);
 
     const fullNextVisitDate =
-      editedNextVisitDate && editedNextVisitTime
-        ? `${editedNextVisitDate}T${editedNextVisitTime}`
+      editedNextVisitDate
+        ? (editedNextVisitTime ? `${editedNextVisitDate}T${editedNextVisitTime}` : editedNextVisitDate)
         : null;
 
     // BackendのSoapNotes(s,o,a,p)に合わせて送信

@@ -39,6 +39,8 @@ export default function Page() {
   }>({});
   const [farmList, setFarmList] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  // スケジュールから詳細へ遷移した際の戻り先を保持
+  const [lastViewBeforeDetail, setLastViewBeforeDetail] = useState<ViewState | null>(null);
   const { doctor, setDoctor } = useDoctor();
 
   // SSR時は null にしてCSR後に設定
@@ -80,6 +82,8 @@ export default function Page() {
   setIsLoading(true);
   setError("");
   try {
+    // 現在のビューを保持して、詳細から戻れるようにする
+    setLastViewBeforeDetail(view);
     console.log("Fetching animal detail for:", microchip_number);
     const animalDataFromApi = await api.fetchAnimalDetail(microchip_number);
     
@@ -116,8 +120,8 @@ export default function Page() {
     setError("");
     try {
       // 次回予約の結合（YYYY-MM-DDTHH:MM）
-      const fullNextVisit = recordData.nextVisitDate && recordData.nextVisitTime
-        ? `${recordData.nextVisitDate}T${recordData.nextVisitTime}`
+      const fullNextVisit = recordData.nextVisitDate
+        ? (recordData.nextVisitTime ? `${recordData.nextVisitDate}T${recordData.nextVisitTime}` : recordData.nextVisitDate)
         : undefined;
 
       await api.createRecord({
@@ -146,6 +150,8 @@ export default function Page() {
       const data = await api.fetchAnimalDetail(microchip_number);
       if (data) setCurrentAnimalData(data);
       await refreshAppData();
+      // 反映遅延対策: 少し待って再取得（外部I/O遅延の吸収）
+      setTimeout(() => { refreshAppData(); }, 800);
     } catch {
       setError("記録の保存に失敗しました。");
     } finally {
@@ -270,6 +276,15 @@ export default function Page() {
             appointments={appointments}
             onSelectAnimal={handleSelectAnimal}
             onAppointmentsUpdate={refreshAppData}
+            onBackToSchedule={(() => {
+              if (lastViewBeforeDetail === "dailyAppointments") {
+                setView("dailyAppointments");
+              } else if (lastViewBeforeDetail === "calendar") {
+                setView("calendar");
+              } else {
+                setView("search");
+              }
+            })}
           />
         ) : null;
       case "calendar":
@@ -318,6 +333,19 @@ export default function Page() {
           <LanguageSelector />
           <DoctorSelector />
         </div>
+        {view === "detail" && (lastViewBeforeDetail === "calendar" || lastViewBeforeDetail === "dailyAppointments") && (
+          <div className="mb-3 flex justify-start">
+            <button
+              onClick={() => {
+                if (lastViewBeforeDetail === "dailyAppointments") setView("dailyAppointments");
+                else setView("calendar");
+              }}
+              className="inline-flex items-center text-purple-700 hover:text-purple-900 underline"
+            >
+              ← スケジュールに戻る
+            </button>
+          </div>
+        )}
         <div className="py-4">
         {error && view !== "newAnimal" && (
           <p className="text-red-500 text-center mb-4">{error}</p>
