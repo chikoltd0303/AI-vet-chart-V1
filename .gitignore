@@ -1,6 +1,8 @@
 service_account.json
 node_modules/
 .env
+.env.*
+**/.env
 .venv/
 __pycache__/
 *.b64
@@ -9,6 +11,22 @@ __pycache__/
 Frontend/.env.local
 
 # Next.js build output
+# Next.js build output
 .next/
+Frontend/.next/
+Frontend/.vercel/
 # Windows reserved filename accidentally added
 CON
+
+# Playwright artifacts (Frontend)
+Frontend/playwright-report/
+Frontend/playwright-artifacts/
+Frontend/playwright-*.json
+Frontend/playwright-*.xml
+Frontend/playwright-*.md
+Frontend/playwright-*.txt
+
+# Uvicorn logs (Backend)
+Backend/uvicorn*.log
+Backend/.env
+Backend/uploads/
