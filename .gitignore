@@ -33,3 +33,28 @@ Frontend/playwright-*.txt
 Backend/uvicorn*.log
 Backend/.env
 Backend/uploads/
+
+# Secrets
+service_account.json
+*.json.json
+.env
+.env.*
+**/.env
+**/.env.*
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+build/
+dist/
+*.pack.gz
+
+# Misc
+.DS_Store
+*.log
