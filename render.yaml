@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: ai-vet-chart-backend
+    env: python
+    plan: free
+    rootDir: Backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: CORS_ALLOW_ORIGIN_REGEX
+        value: ^https://.*\.vercel\.app$
+      - key: ENABLE_DEBUG_ENDPOINTS
+        value: "0"
+      # Secrets to be set in Render Dashboard after import
+      - key: GOOGLE_SERVICE_ACCOUNT_B64
+        sync: false
+      - key: SPREADSHEET_ID
+        sync: false
+      - key: GOOGLE_GEMINI_API_KEY
+        sync: false
+
+# 変更理由: Render BlueprintでBackendを無料デプロイできるようにするため。
