@@ -20,15 +20,24 @@ const DailyAppointments: React.FC<DailyAppointmentsProps> = ({
   onSelectAnimal,
 }) => {
   const { lang } = useI18n();
+  const toMinutes = (t?: string) => {
+    if (!t) return Number.POSITIVE_INFINITY;
+    const m = t.match(/^(\d{1,2}):(\d{2})$/);
+    if (!m) return Number.POSITIVE_INFINITY;
+    const h = parseInt(m[1], 10);
+    const mm = parseInt(m[2], 10);
+    return h * 60 + mm;
+  };
   const sortedAppointments = [...appointments].sort((a, b) => {
-    const ta = a.time || "";
-    const tb = b.time || "";
-    if (ta && tb) return ta.localeCompare(tb);
-    return a.date.localeCompare(b.date);
+    const ma = toMinutes(a.time);
+    const mb = toMinutes(b.time);
+    if (ma !== mb) return ma - mb;
+    // tie-breaker: by date string (if available)
+    return (a.date || "").localeCompare(b.date || "");
   });
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4 md:p-6 animate-fade-in">
+    <div className="w-full max-w-4xl mx-auto p-3 md:p-6 animate-fade-in">
       <div className="flex justify-between items-center mb-4">
         <button onClick={onBack} className="flex items-center text-blue-600 hover:underline">
           <ArrowLeft className="mr-1 h-4 w-4" /> {lang === 'ja' ? 'カレンダーに戻る' : 'Back to Calendar'}
@@ -37,8 +46,8 @@ const DailyAppointments: React.FC<DailyAppointmentsProps> = ({
           <Home className="mr-1 h-4 w-4" /> {lang === 'ja' ? 'ホームへ' : 'Home'}
         </button>
       </div>
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-gray-900 flex items-center mb-4">
+      <div className="bg-white p-4 md:p-6 rounded-lg shadow-md">
+        <h2 className="text-xl md:text-2xl font-bold text-gray-900 flex items-center mb-4">
           <Calendar className="mr-2" />
           {selectedDate} {lang === 'ja' ? 'の予約' : 'Appointments'}
         </h2>
@@ -49,11 +58,11 @@ const DailyAppointments: React.FC<DailyAppointmentsProps> = ({
               return (
                 <li
                   key={index}
-                  className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                  className="p-3 md:p-4 hover:bg-gray-50 cursor-pointer transition-colors"
                   onClick={() => onSelectAnimal(app.microchip_number)}
                 >
-                  <p className="font-bold text-lg text-blue-700 flex items-center">
-                    <span className="font-mono bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm mr-3">
+                  <p className="font-bold text-base md:text-lg text-blue-700 flex items-center">
+                    <span className="font-mono bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs md:text-sm mr-3">
                       {time}
                     </span>
                     {app.animal_name}

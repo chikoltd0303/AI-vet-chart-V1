@@ -7,12 +7,68 @@ import { api } from "./api";
 export const updateAppointments = async (): Promise<{ [key: string]: AppointmentWithAnimalInfo[] }> => {
   try {
     const appointmentsData = await api.getAppointments();
+    // 正規化: Backendの date に時刻が含まれる/ time にURLが入る等の揺らぎを吸収
+    const normalized = (appointmentsData as any[]).map((a: any) => {
+      const rawDate = String(a.date || "");
+      const timeCandidate = (a.time ?? "").toString();
+
+      // date 部分抽出: 'YYYY-MM-DDTHH:MM' or 'YYYY-MM-DD HH:MM' → 'YYYY-MM-DD'
+      const tIndex = rawDate.indexOf("T");
+      const sIndex = rawDate.indexOf(" ");
+      const delim = tIndex >= 0 ? tIndex : sIndex;
+      const datePart = delim > 0 ? rawDate.slice(0, delim) : rawDate;
+
+      // time 部分抽出: date 由来 or time フィールドが時刻なら優先
+      let timePart = "";
+      const fromDate = delim > 0 ? rawDate.slice(delim + 1).slice(0, 5) : "";
+      if (/^\d{1,2}:\d{2}$/.test(fromDate)) {
+        timePart = fromDate;
+      }
+      if (!timePart && /^\d{1,2}:\d{2}$/.test(timeCandidate)) {
+        timePart = timeCandidate;
+      }
+      // URLやパスが time に入っている場合は破棄
+      if (/^https?:\/\//.test(timeCandidate) || timeCandidate.startsWith("/uploads/")) {
+        // keep timePart as-is (possibly empty)
+      }
+
+      return { ...a, date: datePart, time: timePart } as AppointmentWithAnimalInfo;
+    });
+
     const grouped: { [key: string]: AppointmentWithAnimalInfo[] } = {} as any;
-    (appointmentsData as any[]).forEach((a: any) => {
+    normalized.forEach((a: any) => {
       const date = a.date;
       if (!grouped[date]) grouped[date] = [];
       grouped[date].push(a);
     });
+    // APIが空配列なら、モックDBから補完
+    if (Object.keys(grouped).length === 0) {
+      const fallback: { [key: string]: AppointmentWithAnimalInfo[] } = {} as any;
+      for (const microchipNumber in MOCK_DB.records) {
+        const animal = MOCK_DB.animals[microchipNumber];
+        const records = MOCK_DB.records[microchipNumber];
+        if (!animal) continue; // farm_id は任意
+        records.forEach((record, index) => {
+          if (record.next_visit_date) {
+            const dateStr = record.next_visit_date as string;
+            const date = dateStr.split("T")[0];
+            const time = dateStr.includes("T") ? dateStr.split("T")[1].slice(0, 5) : "";
+            if (!fallback[date]) { fallback[date] = []; }
+            fallback[date].push({
+              id: `${microchipNumber}-${index}`,
+              microchip_number: microchipNumber,
+              animal_name: animal.name,
+              farm_id: animal.farm_id,
+              date,
+              time,
+              summary: record.soap.a,
+              next_visit_date: record.next_visit_date,
+            } as any);
+          }
+        });
+      }
+      return fallback;
+    }
     return grouped;
   } catch (error) {
     console.error("Failed to fetch appointments from API:", error);
@@ -21,12 +77,12 @@ export const updateAppointments = async (): Promise<{ [key: string]: Appointment
     for (const microchipNumber in MOCK_DB.records) {
       const animal = MOCK_DB.animals[microchipNumber];
       const records = MOCK_DB.records[microchipNumber];
-      if (!animal || !animal.farm_id) continue;
+      if (!animal) continue; // farm_id は任意
       records.forEach((record, index) => {
-        if (record.next_visit_date && animal.farm_id) {
-          const dateTime = new Date(record.next_visit_date);
-          const date = record.next_visit_date.split("T")[0];
-          const time = dateTime.toTimeString().slice(0, 5);
+        if (record.next_visit_date) {
+          const dateStr = record.next_visit_date as string;
+          const date = dateStr.split("T")[0];
+          const time = dateStr.includes("T") ? dateStr.split("T")[1].slice(0, 5) : "";
           if (!allAppointments[date]) { allAppointments[date] = []; }
           allAppointments[date].push({
             id: `${microchipNumber}-${index}`,
