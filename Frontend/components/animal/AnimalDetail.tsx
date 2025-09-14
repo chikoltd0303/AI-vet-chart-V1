@@ -17,6 +17,7 @@ import {
   Image as ImageIcon
 } from "lucide-react";
 import NewRecordForm from "../record/NewRecordForm";
+import Translatable from "@/components/shared/Translatable";
 import { TIME_OPTIONS } from "@/lib/utils";
 
 interface AnimalDetailProps {
@@ -567,28 +568,20 @@ const AnimalDetail: React.FC<AnimalDetailProps> = ({
                     <>
                       <div className="mt-2 space-y-2 text-sm">
                         <p className="text-gray-800">
-                          <strong className="text-gray-800 uppercase font-bold">
-                            S:
-                          </strong>{" "}
-                          {(rec.soap?.subjective || rec.soap?.s || '') as string}
+                          <strong className="text-gray-800 uppercase font-bold">S:</strong>{" "}
+                          <Translatable text={(rec.soap?.subjective || rec.soap?.s || '') as string} />
                         </p>
                         <p className="text-gray-800">
-                          <strong className="text-gray-800 uppercase font-bold">
-                            O:
-                          </strong>{" "}
-                          {(rec.soap?.objective || rec.soap?.o || '') as string}
+                          <strong className="text-gray-800 uppercase font-bold">O:</strong>{" "}
+                          <Translatable text={(rec.soap?.objective || rec.soap?.o || '') as string} />
                         </p>
                         <p className="text-gray-800">
-                          <strong className="text-gray-800 uppercase font-bold">
-                            A:
-                          </strong>{" "}
-                          {(rec.soap?.assessment || rec.soap?.a || '') as string}
+                          <strong className="text-gray-800 uppercase font-bold">A:</strong>{" "}
+                          <Translatable text={(rec.soap?.assessment || rec.soap?.a || '') as string} />
                         </p>
                         <p className="text-gray-800">
-                          <strong className="text-gray-800 uppercase font-bold">
-                            P:
-                          </strong>{" "}
-                          {(rec.soap?.plan || rec.soap?.p || '') as string}
+                          <strong className="text-gray-800 uppercase font-bold">P:</strong>{" "}
+                          <Translatable text={(rec.soap?.plan || rec.soap?.p || '') as string} />
                         </p>
                       </div>
                       

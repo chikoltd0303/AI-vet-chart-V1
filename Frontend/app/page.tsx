@@ -131,6 +131,9 @@ export default function Page() {
         next_visit_date: fullNextVisit,
         next_visit_time: recordData.nextVisitTime,
         doctor: doctor || undefined,
+        // extensions
+        ...(recordData.medications ? { medications_json: JSON.stringify(recordData.medications) } : {} as any),
+        ...(recordData.nosai_points !== undefined ? { nosai_points: recordData.nosai_points } : {} as any),
       });
 
       // 月一覧への即時反映用にMOCK_DBへも追記（疑似的に予定を追加）

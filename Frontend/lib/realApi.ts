@@ -29,6 +29,13 @@ export class ApiClientError extends Error {
     super(message);
     this.name = 'ApiClientError';
   }
+  // 翻訳 API
+  async translateText(text: string, target_lang: string = 'en'): Promise<{ translated: string; target_lang: string; service: string | null; }> {
+    const formData = new FormData();
+    formData.append('text', text);
+    formData.append('target_lang', target_lang);
+    return this.request(`/api/translate`, { method: 'POST', body: formData });
+  }
 }
 
 class ApiClient {
@@ -283,6 +290,15 @@ class ApiClient {
     
     if (recordData.medication_history) {
       formData.append("medication_history", JSON.stringify(recordData.medication_history));
+    }
+
+    // extensions: medications_json / nosai_points (optional)
+    const anyData: any = recordData as any;
+    if (anyData.medications_json) {
+      formData.append("medications_json", anyData.medications_json);
+    }
+    if (anyData.nosai_points !== undefined && anyData.nosai_points !== null) {
+      formData.append("nosai_points", String(anyData.nosai_points));
     }
 
     return this.request<RecordCreationResponse>("/api/records", {

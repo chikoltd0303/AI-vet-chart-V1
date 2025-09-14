@@ -13,6 +13,9 @@ interface NewRecordFormProps {
     images?: File[];
     nextVisitDate?: string;
     nextVisitTime?: string;
+    // 拡張: medications/nosai_points も受け渡す
+    medications?: { name: string; dose?: string; route?: string }[];
+    nosai_points?: number;
   }) => Promise<void>;
   isProcessing: boolean;
   setIsProcessing: (processing: boolean) => void;
@@ -57,6 +60,8 @@ const NewRecordForm: React.FC<NewRecordFormProps> = (
 
   // 画像アップロード/撮影
   const [images, setImages] = useState<File[]>([]);
+  const [medications, setMedications] = useState<{ name: string; dose?: string; route?: string }[]>([]);
+  const [nosaiPoints, setNosaiPoints] = useState<number | undefined>(undefined);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -181,7 +186,14 @@ const NewRecordForm: React.FC<NewRecordFormProps> = (
     setErrors([]);
     setIsProcessing(true);
     try {
-      await onSave({ soap, images: images.length ? images : undefined, nextVisitDate: nextVisitDate || undefined, nextVisitTime: nextVisitTime || undefined });
+      await onSave({
+        soap,
+        images: images.length ? images : undefined,
+        nextVisitDate: nextVisitDate || undefined,
+        nextVisitTime: nextVisitTime || undefined,
+        medications: medications.length ? medications : undefined,
+        nosai_points: nosaiPoints,
+      });
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 2500);
       if (nextVisitDate && nextVisitTime && onAppointmentsUpdate) onAppointmentsUpdate();
@@ -191,6 +203,8 @@ const NewRecordForm: React.FC<NewRecordFormProps> = (
       setSoap({ s: "", o: "", a: "", p: "" });
       setImages([]);
       setTranscribedText("");
+      setMedications([]);
+      setNosaiPoints(undefined);
       setNextVisitDate("");
       setNextVisitTime("");
       stopCamera();
@@ -282,6 +296,40 @@ const NewRecordForm: React.FC<NewRecordFormProps> = (
               className="w-full p-2 border border-gray-300 rounded-md block font-semibold text-gray-800 text-sm"
               placeholder="ここに音声認識結果が表示、または手動で入力します" />
           </div>
+        </div>
+
+        {/* 投薬（薬剤名/用量/投与ルート） */}
+        <div className="space-y-3">
+          <h4 className="font-semibold text-gray-800">投薬</h4>
+          <div className="space-y-2">
+            {medications.map((m, idx) => (
+              <div key={idx} className="grid grid-cols-1 md:grid-cols-12 gap-2 items-center">
+                <input value={m.name} onChange={(e)=>{
+                  const v=[...medications]; v[idx] = { ...v[idx], name: e.target.value }; setMedications(v);
+                }} placeholder="薬剤名" className="md:col-span-5 border rounded p-2 text-sm" />
+                <input value={m.dose||''} onChange={(e)=>{
+                  const v=[...medications]; v[idx] = { ...v[idx], dose: e.target.value }; setMedications(v);
+                }} placeholder="用量(例: 5mg/kg)" className="md:col-span-4 border rounded p-2 text-sm" />
+                <select value={m.route||''} onChange={(e)=>{
+                  const v=[...medications]; v[idx] = { ...v[idx], route: e.target.value }; setMedications(v);
+                }} className="md:col-span-2 border rounded p-2 text-sm">
+                  <option value="">投与ルート</option>
+                  <option value="PO">PO(経口)</option>
+                  <option value="IM">IM(筋注)</option>
+                  <option value="IV">IV(静注)</option>
+                  <option value="SC">SC(皮下)</option>
+                </select>
+                <button type="button" onClick={()=> setMedications(medications.filter((_,i)=> i!==idx))} className="md:col-span-1 text-red-600 text-sm">削除</button>
+              </div>
+            ))}
+          </div>
+          <button type="button" onClick={()=> setMedications([...medications, { name: '' }])} className="px-3 py-1 bg-gray-100 border rounded text-sm">投薬を追加</button>
+        </div>
+
+        {/* NOSAI 点数（オプション） */}
+        <div className="space-y-2">
+          <h4 className="font-semibold text-gray-800">NOSAI（任意）</h4>
+          <input type="number" min={0} value={nosaiPoints ?? ''} onChange={(e)=> setNosaiPoints(e.target.value === '' ? undefined : Number(e.target.value))} className="border rounded p-2 w-40 text-sm" placeholder="治療点数" />
         </div>
 
         {/* 画像（撮影/アップロード/プレビュー） */}
@@ -469,6 +517,19 @@ const NewRecordForm: React.FC<NewRecordFormProps> = (
             {isProcessing ? "保存中..." : "診療記録を保存"}
           </button>
         </div>
+        {/* 画像選択（カメラ対応） */}
+        <div className="mt-4">
+          <label className="block text-sm font-semibold text-gray-800 mb-1">画像を追加</label>
+          <input
+            type="file"
+            accept="image/*"
+            capture="environment"
+            multiple
+            onChange={handleSelectImages}
+            className="block w-full text-sm text-gray-800 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-800 hover:file:bg-gray-200"
+          />
+        </div>
+
       </form>
     </div>
   );

@@ -130,6 +130,24 @@ class GoogleAIService:
                 p="しばらくしてから再度お試しください"
             )
 
+# --- Simple translation support ---
+    def translate_text(self, text: str, target_lang: str = "en") -> str:
+        """Translate text to target_lang using Gemini. Returns original on error."""
+        if not text:
+            return text
+        try:
+            prompt = (
+                "You are a professional translator. Translate the following text "
+                f"into {target_lang}. Return only the translated text without any extra commentary or quotes.\n\n"
+                f"TEXT:\n{text}"
+            )
+            resp = self.model.generate_content(prompt)
+            out = (getattr(resp, "text", "") or "").strip()
+            return out or text
+        except Exception as e:
+            print(f"[translate] failed: {e}")
+            return text
+
 # サービスインスタンスを返す関数を定義
 _ai_service_instance = None
 def get_ai_service() -> GoogleAIService:
@@ -140,3 +158,26 @@ def get_ai_service() -> GoogleAIService:
     if _ai_service_instance is None:
         _ai_service_instance = GoogleAIService()
     return _ai_service_instance
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

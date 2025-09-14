@@ -21,17 +21,24 @@ import json as _json
 load_dotenv()
 init_env()
 
+# Determine dev/runtime flags from environment
+_LOCAL_DEV = os.getenv("LOCAL_DEV", "0") == "1"
+_SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
+
 # Google サービスは起動時に初期化
 google_audio_service: Optional[GoogleAudioService] = None
 google_ai_service: Optional[GoogleAIService] = None
 
-# DB 初期ロード（失敗しても起動は続行）
-try:
-    DB.load_from_sheets()
-except Exception:
-    print("Google Sheets からの初期データ読み込みに失敗しました")
-    import traceback
-    traceback.print_exc()
+# DB 初期ロード（LOCAL_DEV もしくは Sheets 未設定ならスキップ）
+if not _LOCAL_DEV and _SPREADSHEET_ID:
+    try:
+        DB.load_from_sheets()
+    except Exception:
+        print("Google Sheets からの初期データ読み込みに失敗しました")
+        import traceback
+        traceback.print_exc()
+else:
+    print("[startup] Skipping Google Sheets load (LOCAL_DEV=1 or SPREADSHEET_ID not set)")
 
 app = FastAPI(title="AI Vet Chart Backend")
 
@@ -123,9 +130,18 @@ if DEBUG_ENDPOINTS:
 @app.on_event("startup")
 async def on_startup():
     global google_audio_service, google_ai_service
-    google_audio_service = GoogleAudioService()
-    google_ai_service = GoogleAIService(audio_service=google_audio_service)
-    print("Google Audio / AI services initialized")
+    # Only initialize AI services when an API key is present
+    if get_gemini_api_key():
+        try:
+            google_audio_service = GoogleAudioService()
+            google_ai_service = GoogleAIService(audio_service=google_audio_service)
+            print("Google Audio / AI services initialized")
+        except Exception as e:
+            google_audio_service = None
+            google_ai_service = None
+            print(f"[startup] Google services not initialized: {e}")
+    else:
+        print("[startup] Gemini API key not set; AI services disabled")
 
 # 動物一覧・検索（簡易フィルタ対応）
 @app.get("/api/animals")
@@ -247,6 +263,10 @@ async def create_record(
     next_visit_date: str = Form(None),
     next_visit_time: str = Form(None),
     doctor: str = Form(None),
+    medications_json: str = Form(None),
+    nosai_points: int = Form(None),
+    external_case_id: str = Form(None),
+    external_ref_url: str = Form(None),
 ):
     animal = DB.get_animal(animalId)
     if not animal:
@@ -293,6 +313,23 @@ async def create_record(
         record.next_visit_time = next_visit_time
     if doctor:
         record.doctor = doctor
+    # medications
+    if medications_json:
+        try:
+            meds = _json.loads(medications_json)
+            # 型: List[dict] -> MedicationEntry に変換
+            record.medications = [Record.MedicationEntry(**m) for m in meds]
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"medications_json が不正です: {e}")
+    if nosai_points is not None:
+        try:
+            record.nosai_points = int(nosai_points)
+        except Exception:
+            raise HTTPException(status_code=400, detail="nosai_points は整数で指定してください")
+    if external_case_id:
+        record.external_case_id = external_case_id
+    if external_ref_url:
+        record.external_ref_url = external_ref_url
     DB.add_record(record)
     return {
         "record": record,
@@ -320,6 +357,19 @@ async def generate_soap_from_text_compat(text: str = Form(None), transcribed_tex
         "status": "success",
         "service": "google_gemini",
     }
+
+@app.post("/api/translate")
+async def api_translate(text: str = Form(...), target_lang: str = Form("en")):
+    """Translate arbitrary text into target language using Gemini if available.
+
+    If AI service is not initialized, returns the original text.
+    """
+    if not text:
+        raise HTTPException(status_code=400, detail="text is required")
+    if google_ai_service is None:
+        return {"translated": text, "target_lang": target_lang, "service": None}
+    translated = google_ai_service.translate_text(text, target_lang=target_lang)
+    return {"translated": translated, "target_lang": target_lang, "service": "google_gemini"}
 
 
 # 予定一覧（レコードの next_visit_date から集計）

@@ -21,6 +21,13 @@ class Record(BaseModel):
     soap: SoapNotes
     images: List[str] = []
     audioUrl: Optional[str] = None
+    # medications: 構造化された投薬情報
+    class MedicationEntry(BaseModel):
+        name: str
+        dose: Optional[str] = None
+        route: Optional[str] = None
+
+    medications: Optional[List[MedicationEntry]] = []
     
     # ★ 以下の不足していたフィールドを追加
     visit_date: str = Field(default_factory=lambda: date.today().isoformat())
@@ -28,6 +35,11 @@ class Record(BaseModel):
     next_visit_date: Optional[str] = None
     next_visit_time: Optional[str] = None
     doctor: Optional[str] = None
+    # NOSAI オプション点数
+    nosai_points: Optional[int] = None
+    # 外部受付連携用（将来拡張）
+    external_case_id: Optional[str] = None
+    external_ref_url: Optional[str] = None
     
     # createdAtはFastAPIから返却する際に使われる想定
     createdAt: datetime = Field(default_factory=datetime.utcnow)
