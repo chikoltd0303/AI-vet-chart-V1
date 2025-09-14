@@ -1,63 +1,56 @@
+param([switch]$NoBackend, [switch]$NoFrontend)
 $ErrorActionPreference = 'Stop'
 
-param(
-  [switch]$NoBackend,
-  [switch]$NoFrontend
-)
-
-function Test-Command($name) {
-  $null -ne (Get-Command $name -ErrorAction SilentlyContinue)
+function CmdExists([string]$name) { $null -ne (Get-Command $name -ErrorAction SilentlyContinue) }
+function StopJobIfAny([string]$name) {
+  $j = Get-Job -Name $name -ErrorAction SilentlyContinue
+  if ($j) {
+    try { Stop-Job -Job $j -Force -ErrorAction SilentlyContinue } catch {}
+    try { Remove-Job -Job $j -Force -ErrorAction SilentlyContinue } catch {}
+  }
 }
 
+# Script root
+$Root = Split-Path -Parent $MyInvocation.MyCommand.Path
+if (-not $Root) { $Root = (Get-Location).Path }
+
 function Start-Backend {
-  Push-Location Backend
-  try {
-    if (-not (Test-Command python)) {
-      Write-Warning 'python が見つかりません。Backend を起動できません。'
-      return
-    }
-    # Prefer uvicorn module via python -m for venv compatibility
-    Start-Job -Name 'backend' -ScriptBlock {
-      Set-Location $using:PWD
-      Set-Location Backend
-      python -m uvicorn main:app --reload --port 8000
-    } | Out-Null
-    Write-Host '[dev] Backend (uvicorn) を起動しました -> http://localhost:8000'
-  } finally {
-    Pop-Location
-  }
+  StopJobIfAny 'backend'
+  $dir = Join-Path $Root 'Backend'
+  if (-not (Test-Path $dir)) { Write-Host "WARN: backend dir not found: $dir"; return }
+
+  $py = if (CmdExists 'python') { 'python' } elseif (CmdExists 'py') { 'py' } else { $null }
+  if (-not $py) { Write-Host 'WARN: python not found'; return }
+
+  Start-Job -Name 'backend' -ScriptBlock {
+    param($d,$pycmd)
+    Set-Location $d
+    & $pycmd -m uvicorn main:app --reload --port 8000
+  } -ArgumentList $dir,$py | Out-Null
+
+  Write-Host 'OK: backend -> http://localhost:8000'
 }
 
 function Start-Frontend {
-  Push-Location Frontend
-  try {
-    if (Test-Command pnpm) {
-      Start-Job -Name 'frontend' -ScriptBlock {
-        Set-Location $using:PWD
-        Set-Location Frontend
-        pnpm dev
-      } | Out-Null
-      Write-Host '[dev] Frontend (pnpm) を起動しました -> http://localhost:3000'
-      return
-    }
-    if (Test-Command npm) {
-      Start-Job -Name 'frontend' -ScriptBlock {
-        Set-Location $using:PWD
-        Set-Location Frontend
-        npm run dev
-      } | Out-Null
-      Write-Host '[dev] Frontend (npm) を起動しました -> http://localhost:3000'
-      return
-    }
-    Write-Warning 'pnpm / npm が見つかりません。Frontend を起動できません。'
-  } finally {
-    Pop-Location
+  StopJobIfAny 'frontend'
+  $dir = Join-Path $Root 'Frontend'
+  if (-not (Test-Path $dir)) { Write-Host "WARN: frontend dir not found: $dir"; return }
+
+  if (CmdExists 'pnpm') {
+    Start-Job -Name 'frontend' -ScriptBlock { param($d) Set-Location $d; pnpm dev } -ArgumentList $dir | Out-Null
+    Write-Host 'OK: frontend (pnpm) -> http://localhost:3000'
+  }
+  elseif (CmdExists 'npm') {
+    Start-Job -Name 'frontend' -ScriptBlock { param($d) Set-Location $d; npm run dev } -ArgumentList $dir | Out-Null
+    Write-Host 'OK: frontend (npm) -> http://localhost:3000'
+  }
+  else {
+    Write-Host 'WARN: pnpm/npm not found'
   }
 }
 
-Write-Host '[dev] 同時起動を開始します。終了は Ctrl+C 後、ジョブ停止を実施してください。'
 if (-not $NoBackend)  { Start-Backend }
 if (-not $NoFrontend) { Start-Frontend }
 
-Write-Host "[dev] ジョブ一覧は 'Get-Job'、停止は 'Stop-Job -Name backend,frontend' を利用できます。"
-
+Write-Host 'TIP: jobs  -> Get-Job'
+Write-Host 'TIP: stop  -> Stop-Job -Name backend,frontend; Remove-Job -Name backend,frontend'

@@ -1,12 +1,14 @@
 import { api } from './realApi';
+import { getLang } from './i18n';
 
 // Simple cache to avoid repeated translations during a session
 const cache = new Map<string, string>();
 
-function prefersEnglish(): boolean {
-  if (typeof navigator === 'undefined') return false;
-  const l = (navigator.language || (navigator.languages && navigator.languages[0]) || '').toLowerCase();
-  return l.startsWith('en');
+function targetLang(): 'ja' | 'en' {
+  try {
+    const l = getLang();
+    return l === 'en' ? 'en' : 'ja';
+  } catch { return 'ja'; }
 }
 
 function seemsJapanese(text: string): boolean {
@@ -17,12 +19,16 @@ function seemsJapanese(text: string): boolean {
 export async function maybeTranslate(text: string): Promise<string> {
   try {
     if (!text) return text;
-    if (!prefersEnglish()) return text;
-    if (!seemsJapanese(text)) return text;
-    const key = `en::${text}`;
+    const tgt = targetLang();
+    // heuristics: if target is en and text looks Japanese → translate to en
+    // if target is ja and text looks non-Japanese (ASCII heavy) → translate to ja
+    const looksJa = seemsJapanese(text);
+    const shouldTranslate = (tgt === 'en' && looksJa) || (tgt === 'ja' && !looksJa);
+    if (!shouldTranslate) return text;
+    const key = `${tgt}::${text}`;
     const hit = cache.get(key);
     if (hit) return hit;
-    const res = await api.translateText(text, 'en');
+    const res = await api.translateText(text, tgt);
     const out = (res?.translated || '').trim() || text;
     cache.set(key, out);
     return out;
@@ -30,4 +36,3 @@ export async function maybeTranslate(text: string): Promise<string> {
     return text;
   }
 }
-

@@ -207,7 +207,7 @@ async def upload_image(file: UploadFile = File(...)):
     return UploadResponse(url=url, key=key)
 
 @app.post("/api/transcribe")
-async def transcribe_audio(audio: UploadFile = File(...)):
+async def transcribe_audio(audio: UploadFile = File(...), lang: str = Form(None)):
     if google_audio_service is None:
         raise HTTPException(status_code=500, detail="音声サービスが初期化されていません")
     if not audio or not audio.filename:
@@ -215,7 +215,7 @@ async def transcribe_audio(audio: UploadFile = File(...)):
     audio_data = await audio.read()
     if len(audio_data) > 25 * 1024 * 1024:
         raise HTTPException(status_code=400, detail="ファイルサイズは25MB以下にしてください")
-    text = google_audio_service.transcribe_audio_data(audio_data, audio.filename)
+    text = google_audio_service.transcribe_audio_data(audio_data, audio.filename, language_code=lang)
     if not text:
         raise HTTPException(status_code=500, detail="音声の書き起こしに失敗しました")
     return {
@@ -228,7 +228,7 @@ async def transcribe_audio(audio: UploadFile = File(...)):
     }
 
 @app.post("/api/generateSoap")
-async def generate_soap_endpoint(audio: UploadFile = File(None), transcribed_text: str = Form(None)):
+async def generate_soap_endpoint(audio: UploadFile = File(None), transcribed_text: str = Form(None), lang: str = Form(None), target_lang: str = Form(None)):
     if google_ai_service is None:
         raise HTTPException(status_code=500, detail="AIサービスが初期化されていません")
     text = transcribed_text
@@ -238,10 +238,21 @@ async def generate_soap_endpoint(audio: UploadFile = File(None), transcribed_tex
         data = await audio.read()
         if len(data) > 25 * 1024 * 1024:
             raise HTTPException(status_code=400, detail="ファイルサイズは25MB以下にしてください")
-        text = google_audio_service.transcribe_audio_data(data, audio.filename)
+        text = google_audio_service.transcribe_audio_data(data, audio.filename, language_code=lang)
     if not text:
         raise HTTPException(status_code=400, detail="テキストが指定されていません")
     soap_notes = google_ai_service.generate_soap_from_text(text)
+    # 生成後に出力言語を揃えたい場合は、target_lang を指定して翻訳
+    if target_lang:
+        try:
+            s = google_ai_service.translate_text(soap_notes.s, target_lang)
+            o = google_ai_service.translate_text(soap_notes.o, target_lang)
+            a = google_ai_service.translate_text(soap_notes.a, target_lang)
+            p = google_ai_service.translate_text(soap_notes.p, target_lang)
+            from schemas import SoapNotes as _SN
+            soap_notes = _SN(s=s, o=o, a=a, p=p)
+        except Exception:
+            pass
     return {
         "soap_notes": soap_notes.model_dump(),
         "original_text": text,
@@ -256,6 +267,7 @@ async def create_record(
     audio: UploadFile = File(None),
     images: List[UploadFile] = File(None),
     auto_transcribe: bool = Form(False),
+    lang: str = Form(None),
     soap_s: str = Form(""),
     soap_o: str = Form(""),
     soap_a: str = Form(""),
@@ -297,7 +309,7 @@ async def create_record(
             raise HTTPException(status_code=400, detail="ファイルサイズは25MB以下にしてください")
         audio_url, _ = save_file(data, filename=f"audio_{uuid.uuid4().hex}_{audio.filename}")
         if auto_transcribe and google_audio_service is not None and not soap:
-            transcribed = google_audio_service.transcribe_audio_data(data, audio.filename)
+            transcribed = google_audio_service.transcribe_audio_data(data, audio.filename, language_code=lang)
             if transcribed:
                 soap = google_ai_service.generate_soap_from_text(transcribed)
     record = Record(

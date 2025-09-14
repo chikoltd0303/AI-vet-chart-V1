@@ -120,6 +120,12 @@ export const useAudioRecording = (
       const formData = new FormData();
       // Backend は 'audio' フィールドを受け付ける
       formData.append('audio', file);
+      // 推定言語をサーバへヒントとして送る（ja-JP/en-US）
+      try {
+        const ui = (navigator.language || (navigator.languages && navigator.languages[0]) || '').toLowerCase();
+        const lang = ui.startsWith('en') ? 'en-US' : 'ja-JP';
+        formData.append('lang', lang);
+      } catch {}
 
       const response = await fetch(`${apiUrl}/api/transcribe`, {
         method: 'POST',
