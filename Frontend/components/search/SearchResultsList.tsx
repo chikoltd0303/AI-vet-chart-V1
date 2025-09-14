@@ -21,7 +21,7 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
   onAddNew,
   searchTerm,
 }) => {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   return (
     <div className="w-full max-w-2xl mx-auto animate-fade-in" data-testid="results-view">
       <button onClick={onBack} className="flex items-center text-blue-600 hover:underline mb-4">
@@ -30,7 +30,7 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
       <div className="bg-white rounded-lg shadow-md">
         <div className="p-4 border-b border-gray-200">
           <h2 className="text-xl font-bold text-gray-800 flex items-center" data-testid="results-count">
-            <List className="mr-2" /> {t('results_count')}{typeof (results?.length) === 'number' ? ` ${results.length}` : ''}
+            <List className="mr-2" /> {lang === 'en' ? `Results: ${results.length}` : `検索結果: ${results.length} 件`}
           </h2>
         </div>
         {isLoading ? (
@@ -58,7 +58,7 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
           </ul>
         ) : (
           <div className="p-8 text-center bg-gray-50">
-            <p className="text-gray-800 mb-4">{t('no_results')}</p>
+            <p className="text-gray-800 mb-4">{lang === 'en' ? `No animals found for “${searchTerm}”.` : `「${searchTerm}」に一致する動物は見つかりませんでした。`}</p>
             <button
               onClick={onAddNew}
               className="bg-blue-600 text-white px-6 py-3 rounded-full font-semibold shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center mx-auto"
@@ -74,4 +74,3 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
 };
 
 export default SearchResultsList;
-

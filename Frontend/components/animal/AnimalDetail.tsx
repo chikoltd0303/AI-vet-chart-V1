@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import type { AnimalDetailData, Record, SoapNotes, Appointment } from "@/types";
 import {

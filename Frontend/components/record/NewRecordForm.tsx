@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useRef, useState } from "react";
+﻿\ use client\;`r`nimport React, { useEffect, useMemo, useRef, useState } from "react";
 import type { SoapNotes, Appointment } from "@/types";
 import { Mic, MicOff, Upload, Loader2, Calendar as CalendarIcon, Save, Camera, X, Sparkles } from "lucide-react";
 import MiniCalendar from "@/components/calendar/MiniCalendar";
@@ -536,4 +536,5 @@ const NewRecordForm: React.FC<NewRecordFormProps> = (
 };
 
 export default NewRecordForm;
+
 
