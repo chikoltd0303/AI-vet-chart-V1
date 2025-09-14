@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Search, Stethoscope, Loader2, PlusCircle, NotebookTabs, Building } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import Translatable from "@/components/shared/Translatable";
 
 interface AnimalSearchProps {
   onSearch: (searchTerm: string) => void;
@@ -110,7 +111,7 @@ const AnimalSearch: React.FC<AnimalSearchProps> = ({
                   onClick={() => handleFarmSelect(farm)}
                   className="w-full text-left p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition-colors text-gray-800 font-medium"
                 >
-                  {farm}
+                  <Translatable text={farm} />
                 </button>
               </li>
             ))}
@@ -122,4 +123,3 @@ const AnimalSearch: React.FC<AnimalSearchProps> = ({
 };
 
 export default AnimalSearch;
-
