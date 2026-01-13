@@ -3,24 +3,24 @@ import { Search, Stethoscope, Loader2, PlusCircle, NotebookTabs, Building } from
 import { useI18n } from "@/lib/i18n";
 import Translatable from "@/components/shared/Translatable";
 
+import { useRouter } from "next/navigation";
+
 interface AnimalSearchProps {
   onSearch: (searchTerm: string) => void;
   isLoading: boolean;
-  onShowCalendar: () => void;
-  onShowNewAnimalForm: () => void;
   farmList: string[];
 }
 
 const AnimalSearch: React.FC<AnimalSearchProps> = ({
   onSearch,
   isLoading,
-  onShowCalendar,
-  onShowNewAnimalForm,
+  /* onShowCalendar, onShowNewAnimalForm props removed */
   farmList,
 }) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [showFarmList, setShowFarmList] = useState<boolean>(false);
   const { t } = useI18n();
+  const router = useRouter();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,7 +75,7 @@ const AnimalSearch: React.FC<AnimalSearchProps> = ({
       </div>
       <div className="text-center mt-6 flex justify-center space-x-4">
         <button
-          onClick={onShowCalendar}
+          onClick={() => router.push('/calendar')}
           className="bg-purple-600 text-white rounded-full px-4 py-3 font-semibold shadow-lg hover:bg-purple-700 transition-colors flex items-center justify-center"
           data-testid="btn-calendar"
         >
@@ -93,7 +93,7 @@ const AnimalSearch: React.FC<AnimalSearchProps> = ({
       </div>
       <div className="text-center mt-6">
         <button
-          onClick={onShowNewAnimalForm}
+          onClick={() => router.push('/animal/new')}
           className="text-blue-600 font-bold hover:underline transition-colors flex items-center justify-center mx-auto"
           data-testid="btn-new-animal"
         >

@@ -4,24 +4,23 @@ import { ArrowLeft, ChevronRight, List, Loader2, PlusCircle } from "lucide-react
 import { useI18n } from "@/lib/i18n";
 import Translatable from "@/components/shared/Translatable";
 
+import { useRouter } from "next/navigation";
+
 interface SearchResultsListProps {
   results: Animal[];
-  onSelect: (microchipNumber: string) => void;
   onBack: () => void;
   isLoading: boolean;
-  onAddNew: () => void;
   searchTerm: string;
 }
 
 const SearchResultsList: React.FC<SearchResultsListProps> = ({
   results,
-  onSelect,
   onBack,
   isLoading,
-  onAddNew,
   searchTerm,
 }) => {
   const { t, lang } = useI18n();
+  const router = useRouter();
   return (
     <div className="w-full max-w-2xl mx-auto animate-fade-in" data-testid="results-view">
       <button onClick={onBack} className="flex items-center text-blue-600 hover:underline mb-4">
@@ -42,7 +41,7 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
             {results.map((animal) => (
               <li
                 key={animal.microchip_number}
-                onClick={() => onSelect(animal.microchip_number)}
+                onClick={() => router.push(`/animal/${animal.microchip_number}`)}
                 className="p-4 hover:bg-gray-50 cursor-pointer transition-colors flex justify-between items-center"
                 data-testid="result-item"
                 data-id={animal.microchip_number}
@@ -60,7 +59,7 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({
           <div className="p-8 text-center bg-gray-50">
             <p className="text-gray-800 mb-4">{lang === 'en' ? `No animals found for “${searchTerm}”.` : `「${searchTerm}」に一致する動物は見つかりませんでした。`}</p>
             <button
-              onClick={onAddNew}
+              onClick={() => router.push('/animal/new')}
               className="bg-blue-600 text-white px-6 py-3 rounded-full font-semibold shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center mx-auto"
             >
               <PlusCircle className="h-5 w-5 mr-2" />
