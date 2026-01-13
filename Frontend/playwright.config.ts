@@ -6,9 +6,10 @@ const frontendBaseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:300
 
 // Choose package manager command based on lockfiles or override by env
 const webCommand = process.env.PW_WEB_COMMAND
-  || (fs.existsSync('pnpm-lock.yaml') ? 'pnpm dev'
+  || (fs.existsSync('package-lock.json') ? 'npm run dev'
+    : fs.existsSync('pnpm-lock.yaml') ? 'pnpm dev'
       : fs.existsSync('yarn.lock') ? 'yarn dev'
-      : 'npm run dev');
+        : 'npm run dev');
 
 export default defineConfig({
   testDir: './tests/e2e',
