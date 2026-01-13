@@ -1,4 +1,5 @@
-﻿\ use client\;`r`nimport React, { useEffect, useMemo, useRef, useState } from "react";
+﻿"use client";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { SoapNotes, Appointment } from "@/types";
 import { Mic, MicOff, Upload, Loader2, Calendar as CalendarIcon, Save, Camera, X, Sparkles } from "lucide-react";
 import MiniCalendar from "@/components/calendar/MiniCalendar";
@@ -73,7 +74,7 @@ const NewRecordForm: React.FC<NewRecordFormProps> = (
   const [nextVisitTime, setNextVisitTime] = useState<string>("");
   const today = useMemo(() => new Date().toISOString().split("T")[0], []);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
-  const [calendarMode, setCalendarMode] = useState<'list'|'month'>("list");
+  const [calendarMode, setCalendarMode] = useState<'list' | 'month'>("list");
 
   // バリデーション
   const validateForm = () => {
@@ -244,12 +245,12 @@ const NewRecordForm: React.FC<NewRecordFormProps> = (
           <div className="flex flex-wrap gap-3">
             <button type="button" onClick={isTranscribing ? stopSpeechRecognition : startSpeechRecognition}
               className={`flex items-center px-4 py-2 rounded-md transition ${isTranscribing ? "bg-red-600 text-white hover:bg-red-700" : "bg-purple-600 text-white hover:bg-purple-700"}`}>
-              {isTranscribing ? <MicOff className="mr-2 h-4 w-4" /> : <Mic className="mr-2 h-4 w-4" />} 
+              {isTranscribing ? <MicOff className="mr-2 h-4 w-4" /> : <Mic className="mr-2 h-4 w-4" />}
               {isTranscribing ? "認識停止" : "リアルタイム認識"}
             </button>
             <button type="button" onClick={isRecording ? stopRecording : startRecording}
               className={`flex items-center px-4 py-2 rounded-md transition ${isRecording ? "bg-red-600 text-white hover:bg-red-700" : "bg-blue-600 text-white hover:bg-blue-700"}`}>
-              {isRecording ? <MicOff className="mr-2 h-4 w-4" /> : <Mic className="mr-2 h-4 w-4" />} 
+              {isRecording ? <MicOff className="mr-2 h-4 w-4" /> : <Mic className="mr-2 h-4 w-4" />}
               {isRecording ? "録音停止" : "録音して文字起こし"}
             </button>
             <label className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-md cursor-pointer hover:bg-gray-700 transition">
@@ -304,14 +305,14 @@ const NewRecordForm: React.FC<NewRecordFormProps> = (
           <div className="space-y-2">
             {medications.map((m, idx) => (
               <div key={idx} className="grid grid-cols-1 md:grid-cols-12 gap-2 items-center">
-                <input value={m.name} onChange={(e)=>{
-                  const v=[...medications]; v[idx] = { ...v[idx], name: e.target.value }; setMedications(v);
+                <input value={m.name} onChange={(e) => {
+                  const v = [...medications]; v[idx] = { ...v[idx], name: e.target.value }; setMedications(v);
                 }} placeholder="薬剤名" className="md:col-span-5 border rounded p-2 text-sm" />
-                <input value={m.dose||''} onChange={(e)=>{
-                  const v=[...medications]; v[idx] = { ...v[idx], dose: e.target.value }; setMedications(v);
+                <input value={m.dose || ''} onChange={(e) => {
+                  const v = [...medications]; v[idx] = { ...v[idx], dose: e.target.value }; setMedications(v);
                 }} placeholder="用量(例: 5mg/kg)" className="md:col-span-4 border rounded p-2 text-sm" />
-                <select value={m.route||''} onChange={(e)=>{
-                  const v=[...medications]; v[idx] = { ...v[idx], route: e.target.value }; setMedications(v);
+                <select value={m.route || ''} onChange={(e) => {
+                  const v = [...medications]; v[idx] = { ...v[idx], route: e.target.value }; setMedications(v);
                 }} className="md:col-span-2 border rounded p-2 text-sm">
                   <option value="">投与ルート</option>
                   <option value="PO">PO(経口)</option>
@@ -319,17 +320,17 @@ const NewRecordForm: React.FC<NewRecordFormProps> = (
                   <option value="IV">IV(静注)</option>
                   <option value="SC">SC(皮下)</option>
                 </select>
-                <button type="button" onClick={()=> setMedications(medications.filter((_,i)=> i!==idx))} className="md:col-span-1 text-red-600 text-sm">削除</button>
+                <button type="button" onClick={() => setMedications(medications.filter((_, i) => i !== idx))} className="md:col-span-1 text-red-600 text-sm">削除</button>
               </div>
             ))}
           </div>
-          <button type="button" onClick={()=> setMedications([...medications, { name: '' }])} className="px-3 py-1 bg-gray-100 border rounded text-sm">投薬を追加</button>
+          <button type="button" onClick={() => setMedications([...medications, { name: '' }])} className="px-3 py-1 bg-gray-100 border rounded text-sm">投薬を追加</button>
         </div>
 
         {/* NOSAI 点数（オプション） */}
         <div className="space-y-2">
           <h4 className="font-semibold text-gray-800">NOSAI（任意）</h4>
-          <input type="number" min={0} value={nosaiPoints ?? ''} onChange={(e)=> setNosaiPoints(e.target.value === '' ? undefined : Number(e.target.value))} className="border rounded p-2 w-40 text-sm" placeholder="治療点数" />
+          <input type="number" min={0} value={nosaiPoints ?? ''} onChange={(e) => setNosaiPoints(e.target.value === '' ? undefined : Number(e.target.value))} className="border rounded p-2 w-40 text-sm" placeholder="治療点数" />
         </div>
 
         {/* 画像（撮影/アップロード/プレビュー） */}
@@ -447,12 +448,12 @@ const NewRecordForm: React.FC<NewRecordFormProps> = (
                 <div className="mb-2 flex gap-2">
                   <button
                     type="button"
-                    className={`px-3 py-1 rounded border ${calendarMode==='list'?'bg-purple-600 text-white border-purple-600':'bg-white text-gray-800 border-gray-300'}`}
+                    className={`px-3 py-1 rounded border ${calendarMode === 'list' ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-gray-800 border-gray-300'}`}
                     onClick={() => setCalendarMode('list')}
                   >一覧</button>
                   <button
                     type="button"
-                    className={`px-3 py-1 rounded border ${calendarMode==='month'?'bg-purple-600 text-white border-purple-600':'bg-white text-gray-800 border-gray-300'}`}
+                    className={`px-3 py-1 rounded border ${calendarMode === 'month' ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-gray-800 border-gray-300'}`}
                     onClick={() => setCalendarMode('month')}
                   >月表示</button>
                   <div className="ml-auto flex items-center gap-2">
@@ -470,7 +471,7 @@ const NewRecordForm: React.FC<NewRecordFormProps> = (
                       {((appointments[nextVisitDate || today] || []) as any[]).length > 0 ? (
                         ((appointments[nextVisitDate || today] || []) as any[])
                           .slice()
-                          .sort((a: any,b: any)=> (a.time||'').localeCompare(b.time||''))
+                          .sort((a: any, b: any) => (a.time || '').localeCompare(b.time || ''))
                           .map((app: any, idx: number) => (
                             <div key={idx} className="py-2">
                               <div className="text-blue-700 font-semibold">
@@ -525,7 +526,7 @@ const NewRecordForm: React.FC<NewRecordFormProps> = (
             accept="image/*"
             capture="environment"
             multiple
-            onChange={handleSelectImages}
+            onChange={handleImageChange}
             className="block w-full text-sm text-gray-800 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-800 hover:file:bg-gray-200"
           />
         </div>

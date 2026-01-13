@@ -106,8 +106,8 @@ export default function AnimalDetailPage() {
       <div className="container mx-auto px-4 py-8">
         <AnimalDetail
           data={data}
-          onBack={() => router.push("/search")}
-          onHome={() => router.push("/search")}
+          onBack={() => router.push("/")}
+          onHome={() => router.push("/")}
           onSaveRecord={handleSaveRecord}
           onUpdateRecord={handleUpdateRecord}
           appointments={appointments}

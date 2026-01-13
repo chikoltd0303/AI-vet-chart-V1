@@ -36,9 +36,38 @@ class GoogleAIService:
             "response_mime_type": "application/json",
         }
         self.model = genai.GenerativeModel(
-            'gemini-1.5-flash-latest',
+            'gemini-2.5-flash-lite',
             generation_config=self.generation_config
         )
+
+    def _safe_get_response_text(self, response) -> str:
+        """Geminiレスポンスからテキストを安全に取り出す。
+
+        safety block などで response.text が ValueError を投げるケースを避ける。
+        """
+        if response is None:
+            return ""
+        response_text: str = ""
+        try:
+            text = response.text  # type: ignore[attr-defined]
+            if text:
+                return text.strip()
+        except Exception as e:
+            print(f"[gemini] response.text 取得失敗: {e}")
+
+        try:
+            candidates = getattr(response, "candidates", []) or []
+            for cand in candidates:
+                content = getattr(cand, "content", None)
+                parts = getattr(content, "parts", None) or []
+                texts = [getattr(p, "text", "") for p in parts if getattr(p, "text", None)]
+                merged = "\n".join([t for t in texts if t]).strip()
+                if merged:
+                    return merged
+        except Exception as e:
+            print(f"[gemini] candidates 抽出失敗: {e}")
+
+        return ""
 
     def generate_soap_from_text(self, transcribed_text: str) -> SoapNotes:
         """
@@ -91,11 +120,17 @@ class GoogleAIService:
             response = self.model.generate_content(prompt)
             
             print(f"✅ Gemini APIレスポンス受信")
-            print(f"生レスポンス: '{response.text}'")
-            print(f"レスポンス長: {len(response.text)} 文字")
+            response_text = self._safe_get_response_text(response)
+            feedback = getattr(response, "prompt_feedback", None)
+            block_reason = getattr(feedback, "block_reason", None)
+            if block_reason and str(block_reason) != "BLOCK_NONE":
+                raise ValueError(f"Geminiが応答をブロックしました: {block_reason}")
+
+            print(f"生レスポンス: '{response_text}'")
+            print(f"レスポンス長: {len(response_text)} 文字")
             
-            # JSONモードを使用しているため、レスポンスは直接JSON文字列になる
-            response_text = response.text.strip()
+            if not response_text:
+                raise ValueError("Geminiから空の応答が返されました")
             
             print(f"=== JSONパース試行 ===")
             soap_dict = json.loads(response_text)
@@ -109,12 +144,12 @@ class GoogleAIService:
                         
         except (json.JSONDecodeError, TypeError, ValueError) as e:
             print(f"❌ JSONパースまたはデータ検証エラー: {e}")
-            print(f"Geminiからの生の応答: '{response.text if 'response' in locals() else 'N/A'}'")
+            print(f"Geminiからの生の応答: '{response_text}'")
             
             # エラー時もログを残して、デバッグ情報付きで返す
             return SoapNotes(
                 s=f"JSONパースエラー: {str(e)}. 元テキスト: {transcribed_text[:100]}...",
-                o=f"生レスポンス: {response.text[:200] if 'response' in locals() else 'N/A'}...",
+                o=f"生レスポンス: {response_text[:200]}...",
                 a="データ検証に失敗しました",
                 p="再度お試しください"
             )
@@ -142,7 +177,7 @@ class GoogleAIService:
                 f"TEXT:\n{text}"
             )
             resp = self.model.generate_content(prompt)
-            out = (getattr(resp, "text", "") or "").strip()
+            out = self._safe_get_response_text(resp)
             return out or text
         except Exception as e:
             print(f"[translate] failed: {e}")
