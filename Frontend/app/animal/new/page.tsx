@@ -1,40 +1,7 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
-import {
-    Loader2,
-    AlertCircle,
-    CheckCircle,
-    Camera,
-    Upload,
-    Sparkles,
-    ArrowLeft
-} from "lucide-react";
-import type { SoapNotes, Appointment } from "@/types";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { formatFileSize, fileToBase64, getApiUrl } from "@/lib/utils"; // ユーティリティ関数の移動を想定（またはここで再定義）
-
-// 型定義の再利用
-interface NewRecordFormProps {
-    onBack: () => void;
-    onSave: (recordData: any) => Promise<void>;
-    isLoading: boolean;
-    error: string;
-    setError: (error: string) => void;
-    searchTerm?: string;
-}
-
-// ユーティリティ再定義（本来はlib/utils.tsへ移動推奨）
-const isAudioFile = (filename: string): boolean => {
-    const audioExtensions = ['.wav', '.mp3', '.ogg', '.webm', '.flac', '.m4a'];
-    const extension = filename.toLowerCase().substring(filename.lastIndexOf('.'));
-    return audioExtensions.includes(extension);
-};
-
-// ... (NewRecordFormの内容をNext.jsページに適応)
-// ここでは既存のNewRecordFormコンポーネントをimportして使う形にするのが綺麗ですが、
-// ユーザーの要望は「構造の修正」なので、ページコンポーネントとしてラップします。
-
 import NewAnimalForm from "@/components/animal/NewAnimalForm";
 import { api } from "@/lib/api";
 import { updateAppointments } from "@/lib/dataService";
